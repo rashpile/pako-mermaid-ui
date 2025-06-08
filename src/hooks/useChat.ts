@@ -94,7 +94,7 @@ export function useChat() {
 
   // Debounced send message for rapid typing
   const sendMessageDebounced = useDebouncedCallback(
-    (message: string) => sendMessage(message), 
+    sendMessage, 
     300, 
     [sendMessage]
   );
