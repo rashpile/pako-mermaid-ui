@@ -67,15 +67,15 @@
   - **Step Dependencies**: Step 5
   - **User Instructions**: None
 
-- [ ] Step 7: Create custom hooks for editor and chat functionality
+- [x] Step 7: Create custom hooks for editor and chat functionality
   - **Task**: Implement React hooks for managing diagram content, theme, local storage, and AI chat
   - **Files**:
-    - `src/hooks/useDiagram.ts`: Hook for managing diagram content and validation
-    - `src/hooks/useLocalStorage.ts`: Hook for persisting data to local storage
-    - `src/hooks/useTheme.ts`: Hook for theme management
-    - `src/hooks/useDebounce.ts`: Hook for debounced values
-    - `src/hooks/useChat.ts`: Hook for AI chat functionality
-    - `src/hooks/useOpenAI.ts`: Hook for OpenAI API integration
+    - `src/hooks/useDiagram.ts`: Hook for diagram content, validation, CRUD operations with debounced validation
+    - `src/hooks/useLocalStorage.ts`: Hooks for localStorage with React state sync, arrays, objects, and booleans
+    - `src/hooks/useTheme.ts`: Theme management with system theme detection and Mermaid theme integration
+    - `src/hooks/useDebounce.ts`: Debounce hooks for values, callbacks, async functions, and search functionality
+    - `src/hooks/useChat.ts`: AI chat functionality with message management, diagram updates, and suggestions
+    - `src/hooks/useOpenAI.ts`: OpenAI API integration with validation, configuration, and status management
   - **Step Dependencies**: Step 6
   - **User Instructions**: None
 
