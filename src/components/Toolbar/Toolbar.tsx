@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSettingsStore } from '../../store/settingsStore';
 import { useDiagram } from '../../hooks/useDiagram';
 import { ExportButtons } from './ExportButtons';
 import { ExampleSelector } from './ExampleSelector';
 import { ThemeToggle } from './ThemeToggle';
 import { ChatToggle } from './ChatToggle';
+import { SaveDialog, LoadDialog } from '../SaveLoad';
 
 interface ToolbarProps {
   className?: string;
@@ -12,7 +13,9 @@ interface ToolbarProps {
 
 export function Toolbar({ className = '' }: ToolbarProps) {
   const { settings, layoutSettings, updateLayoutSettings } = useSettingsStore();
-  const { currentDiagram, saveDiagram, loadDiagram, clearDiagram } = useDiagram();
+  const { currentDiagram, clearDiagram } = useDiagram();
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [showLoadDialog, setShowLoadDialog] = useState(false);
 
   // Handle new diagram
   const handleNew = () => {
@@ -25,10 +28,16 @@ export function Toolbar({ className = '' }: ToolbarProps) {
 
   // Handle save
   const handleSave = () => {
-    const name = prompt('Enter diagram name:', currentDiagram.name || 'Untitled');
-    if (name) {
-      saveDiagram(name);
+    if (!currentDiagram.content.trim()) {
+      alert('Cannot save an empty diagram');
+      return;
     }
+    setShowSaveDialog(true);
+  };
+
+  // Handle load
+  const handleLoad = () => {
+    setShowLoadDialog(true);
   };
 
   // Handle chat panel toggle
@@ -37,6 +46,38 @@ export function Toolbar({ className = '' }: ToolbarProps) {
       showRightPanel: !layoutSettings.showRightPanel
     });
   };
+
+  // Handle keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Check if we're in an input/textarea or if dialogs are open
+      const target = event.target as HTMLElement;
+      const isInputFocused = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA';
+      const isDialogOpen = showSaveDialog || showLoadDialog;
+
+      if (isInputFocused || isDialogOpen) return;
+
+      if ((event.ctrlKey || event.metaKey)) {
+        switch (event.key.toLowerCase()) {
+          case 's':
+            event.preventDefault();
+            handleSave();
+            break;
+          case 'o':
+            event.preventDefault();
+            handleLoad();
+            break;
+          case 'n':
+            event.preventDefault();
+            handleNew();
+            break;
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [showSaveDialog, showLoadDialog, currentDiagram]);
 
   return (
     <div className={`toolbar bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-2 ${className}`}>
@@ -64,6 +105,17 @@ export function Toolbar({ className = '' }: ToolbarProps) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3-3m0 0l-3 3m3-3v12" />
             </svg>
             Save
+          </button>
+
+          <button
+            onClick={handleLoad}
+            className="px-3 py-1.5 text-sm bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors"
+            title="Load diagram (Ctrl+O)"
+          >
+            <svg className="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+            Load
           </button>
 
           <div className="h-6 w-px bg-gray-300 dark:bg-gray-600" />
@@ -111,6 +163,19 @@ export function Toolbar({ className = '' }: ToolbarProps) {
           </button>
         </div>
       </div>
+
+      {/* Save/Load Dialogs */}
+      <SaveDialog
+        isOpen={showSaveDialog}
+        onClose={() => setShowSaveDialog(false)}
+        currentDiagram={currentDiagram}
+      />
+      
+      <LoadDialog
+        isOpen={showLoadDialog}
+        onClose={() => setShowLoadDialog(false)}
+        currentDiagram={currentDiagram}
+      />
     </div>
   );
 }

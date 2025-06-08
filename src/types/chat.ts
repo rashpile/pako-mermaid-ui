@@ -1,4 +1,6 @@
 // AI Chat related types and interfaces
+import { DiagramAnalysis } from '../utils/diagramAnalyzer';
+import { ValidationResult } from '../utils/mermaidValidator';
 
 export type MessageRole = 'user' | 'assistant' | 'system';
 
@@ -11,6 +13,9 @@ export interface ChatMessage {
     diagramUpdate?: boolean;
     error?: boolean;
     processingTime?: number;
+    intent?: 'create' | 'modify' | 'explain' | 'help' | 'export' | 'unknown';
+    confidence?: number;
+    validationResult?: ValidationResult;
   };
 }
 
@@ -27,6 +32,10 @@ export interface ChatRequest {
   context?: {
     diagramType?: string;
     previousMessages?: ChatMessage[];
+    intent?: 'create' | 'modify' | 'explain' | 'help' | 'export' | 'unknown';
+    confidence?: number;
+    diagramAnalysis?: DiagramAnalysis;
+    suggestions?: string[];
   };
 }
 
@@ -35,6 +44,19 @@ export interface ChatResponse {
   updatedDiagram?: string;
   suggestions?: string[];
   error?: string;
+  metadata?: {
+    intent?: 'create' | 'modify' | 'explain' | 'help' | 'export' | 'unknown';
+    confidence?: number;
+    diagramAnalysis?: DiagramAnalysis;
+    validationResult?: ValidationResult;
+  };
+}
+
+export interface DiagramUpdate {
+  diagram: string;
+  explanation: string;
+  confidence: number;
+  changes: string[];
 }
 
 export interface DiagramUpdateRequest {

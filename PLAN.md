@@ -133,7 +133,7 @@
   - **User Instructions**: None
 
 ## Feature Implementation
-- [ ] Step 13: Implement AI chat functionality
+- [x] Step 13: Implement AI chat functionality
   - **Task**: Create the core AI chat logic for processing user requests and updating diagrams
   - **Files**:
     - `src/utils/aiPromptProcessor.ts`: Process user prompts and generate Mermaid updates
@@ -144,7 +144,7 @@
   - **Step Dependencies**: Step 12
   - **User Instructions**: None
 
-- [ ] Step 14: Implement save/load functionality
+- [x] Step 14: Implement save/load functionality
   - **Task**: Add ability to save diagrams to local storage and load them back
   - **Files**:
     - `src/components/SaveLoad/SaveDialog.tsx`: Save diagram dialog
@@ -154,7 +154,7 @@
   - **Step Dependencies**: Step 13
   - **User Instructions**: None
 
-- [ ] Step 15: Implement export functionality
+- [x] Step 15: Implement export functionality
   - **Task**: Add PNG, SVG, and PDF export capabilities
   - **Files**:
     - `src/utils/exportToPNG.ts`: PNG export using html2canvas

@@ -3,6 +3,9 @@ import { ChatRequest, ChatResponse, DiagramUpdateRequest, DiagramUpdateResponse 
 import { SYSTEM_PROMPTS, buildContextualPrompt } from '../prompts/systemPrompts';
 import { categorizeUserIntent, extractDiagramType } from '../prompts/examples';
 import { debounceAsync } from '../utils/debounce';
+import { analyzeIntent, buildOpenAIPrompt, parseAIResponse, generateSuggestions } from '../utils/aiPromptProcessor';
+import { validateMermaidSyntax } from '../utils/mermaidValidator';
+import { analyzeDiagram } from '../utils/diagramAnalyzer';
 
 class ChatService {
   // Process a chat request and return response
@@ -10,34 +13,50 @@ class ChatService {
     try {
       const { message, currentDiagram, context } = request;
       
-      // Categorize user intent
-      const intent = categorizeUserIntent(message);
-      const diagramType = extractDiagramType(message);
+      // Use enhanced intent analysis
+      const intent = analyzeIntent(message, currentDiagram || '');
       
-      // Build appropriate system prompt based on context
-      const systemPrompt = buildContextualPrompt(
-        SYSTEM_PROMPTS.DIAGRAM_ASSISTANT,
-        {
-          diagramType: diagramType || context?.diagramType,
-          currentDiagram,
-          userIntent: message
-        }
-      );
-
-      // Generate response using OpenAI
+      // Analyze current diagram for context
+      const diagramAnalysis = analyzeDiagram(currentDiagram || '');
+      
+      // Build comprehensive OpenAI prompt
+      const systemPrompt = buildOpenAIPrompt(message, currentDiagram || '', intent);
+      
+      // Generate response using OpenAI with enhanced prompt
       const result = await openAIService.generateDiagram(
         message,
         currentDiagram,
         systemPrompt
       );
 
-      // Determine if this is a diagram update
-      const isUpdate = currentDiagram && currentDiagram.trim() !== result.diagram.trim();
+      // Parse AI response for diagram updates
+      const aiResponse = parseAIResponse(result.explanation);
+      
+      // Validate any generated diagram
+      let validationResult = null;
+      if (aiResponse.diagram) {
+        validationResult = validateMermaidSyntax(aiResponse.diagram);
+      }
+      
+      // Use diagram from validation if available, otherwise fall back to original
+      const finalDiagram = aiResponse.diagram || result.diagram;
+      
+      // Determine if this is a valid diagram update
+      const isValidUpdate = finalDiagram && 
+                           currentDiagram && 
+                           finalDiagram.trim() !== currentDiagram.trim() &&
+                           (!validationResult || validationResult.isValid);
 
       return {
         message: result.explanation,
-        updatedDiagram: isUpdate ? result.diagram : undefined,
-        suggestions: this.generateSuggestions(intent, result.diagram)
+        updatedDiagram: isValidUpdate ? finalDiagram : undefined,
+        suggestions: generateSuggestions(finalDiagram || currentDiagram || ''),
+        metadata: {
+          intent: intent.intent,
+          confidence: intent.confidence,
+          diagramAnalysis,
+          validationResult
+        }
       };
     } catch (error) {
       console.error('Chat processing failed:', error);
@@ -213,41 +232,29 @@ class ChatService {
     return suggestions.slice(0, 5); // Limit to 5 suggestions
   }
 
-  // Validate diagram syntax (placeholder for future Mermaid validation)
+  // Validate diagram syntax using enhanced validator
   async validateDiagram(diagram: string): Promise<{ isValid: boolean; errors: string[] }> {
     try {
-      // This would integrate with Mermaid's validation once we implement the preview
-      // For now, basic syntax checking
-      const errors: string[] = [];
-      
-      if (!diagram.trim()) {
-        errors.push('Diagram cannot be empty');
-      }
-      
-      // Check for basic Mermaid syntax
-      const validStarters = [
-        'flowchart', 'graph', 'sequenceDiagram', 'classDiagram', 
-        'stateDiagram', 'erDiagram', 'gantt', 'pie', 'gitgraph',
-        'mindmap', 'journey'
-      ];
-      
-      const hasValidStarter = validStarters.some(starter => 
-        diagram.toLowerCase().includes(starter.toLowerCase())
-      );
-      
-      if (!hasValidStarter) {
-        errors.push('Diagram must start with a valid Mermaid diagram type');
-      }
-      
+      const result = validateMermaidSyntax(diagram);
       return {
-        isValid: errors.length === 0,
-        errors
+        isValid: result.isValid,
+        errors: result.errors.map(error => error.message)
       };
     } catch (error) {
       return {
         isValid: false,
         errors: ['Validation failed: ' + (error instanceof Error ? error.message : 'Unknown error')]
       };
+    }
+  }
+
+  // Get diagram analysis
+  async getDiagramAnalysis(diagram: string) {
+    try {
+      return analyzeDiagram(diagram);
+    } catch (error) {
+      console.error('Diagram analysis failed:', error);
+      return null;
     }
   }
 }

@@ -5,6 +5,9 @@ import { useSettingsStore } from '../store/settingsStore';
 import { chatService } from '../services/chatService';
 import { ChatRequest } from '../types/chat';
 import { useDebouncedCallback } from './useDebounce';
+import { analyzeIntent, buildOpenAIPrompt, parseAIResponse, generateSuggestions } from '../utils/aiPromptProcessor';
+import { validateMermaidSyntax } from '../utils/mermaidValidator';
+import { analyzeDiagram } from '../utils/diagramAnalyzer';
 
 /**
  * Custom hook for managing AI chat functionality
@@ -40,6 +43,8 @@ export function useChat() {
   const sendMessage = useCallback(async (message: string) => {
     if (!message.trim() || !isChatAvailable) return;
 
+    const startTime = Date.now();
+    
     // Add user message
     addMessage('user', message.trim());
     setCurrentInput('');
@@ -47,37 +52,79 @@ export function useChat() {
     setError(null);
 
     try {
-      // Prepare chat request
+      const currentContent = currentDiagram?.content || '';
+      
+      // Analyze user intent
+      const intent = analyzeIntent(message, currentContent);
+      
+      // Analyze current diagram
+      const diagramAnalysis = analyzeDiagram(currentContent);
+      
+      // Build comprehensive prompt
+      const prompt = buildOpenAIPrompt(message, currentContent, intent);
+      
+      // Prepare enhanced chat request
       const request: ChatRequest = {
         message: message.trim(),
-        currentDiagram: currentDiagram?.content,
+        currentDiagram: currentContent,
         context: {
-          diagramType: detectDiagramType(currentDiagram?.content || ''),
-          previousMessages: getConversationHistory().slice(-6) // Last 3 exchanges
+          diagramType: detectDiagramType(currentContent),
+          previousMessages: getConversationHistory().slice(-6),
+          intent: intent.intent,
+          confidence: intent.confidence,
+          diagramAnalysis,
+          suggestions: generateSuggestions(currentContent)
         }
       };
 
       // Process with AI
       const response = await chatService.processChat(request);
+      const processingTime = Date.now() - startTime;
 
       if (response.error) {
         setError(response.error);
-        addMessage('assistant', 'I apologize, but I encountered an error processing your request. Please try again.');
+        addMessage('assistant', 'I apologize, but I encountered an error processing your request. Please try again.', {
+          error: true,
+          processingTime
+        });
       } else {
-        // Add AI response
+        // Parse AI response for diagram updates
+        const aiUpdate = parseAIResponse(response.message);
+        
+        // Validate generated diagram if present
+        let validationResult = null;
+        if (aiUpdate.diagram) {
+          validationResult = validateMermaidSyntax(aiUpdate.diagram);
+        }
+        
+        // Add AI response with metadata
         addMessage('assistant', response.message, {
-          diagramUpdate: !!response.updatedDiagram
+          diagramUpdate: !!aiUpdate.diagram && validationResult?.isValid,
+          processingTime,
+          intent: intent.intent,
+          confidence: aiUpdate.confidence,
+          validationResult
         });
 
-        // Update diagram if provided
-        if (response.updatedDiagram && currentDiagram) {
-          updateDiagramContent(response.updatedDiagram);
+        // Update diagram if provided and valid
+        if (aiUpdate.diagram && validationResult?.isValid && currentDiagram) {
+          updateDiagramContent(aiUpdate.diagram);
+        } else if (aiUpdate.diagram && !validationResult?.isValid) {
+          // Show validation errors
+          addMessage('assistant', `The generated diagram has validation issues:\n${validationResult?.errors.map(e => `• ${e.message}`).join('\n')}`, {
+            error: true,
+            validationResult
+          });
         }
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to process message';
+      const processingTime = Date.now() - startTime;
       setError(errorMessage);
-      addMessage('assistant', 'I apologize, but I encountered an error. Please check your API key and try again.');
+      addMessage('assistant', 'I apologize, but I encountered an error. Please check your API key and try again.', {
+        error: true,
+        processingTime
+      });
     } finally {
       setLoading(false);
     }
@@ -199,28 +246,18 @@ export function useChatSuggestions() {
 
   // Generate contextual suggestions based on current diagram
   const getSuggestions = useCallback(() => {
-    const suggestions = [
-      'Add error handling to this flow',
-      'Make this diagram more detailed',
-      'Convert to a different diagram type',
-      'Add colors and styling',
-      'Simplify this diagram'
-    ];
-
-    // Add diagram-specific suggestions
     if (currentDiagram?.content) {
-      const content = currentDiagram.content.toLowerCase();
-      
-      if (content.includes('flowchart')) {
-        suggestions.unshift('Add decision points', 'Include parallel processes');
-      } else if (content.includes('sequence')) {
-        suggestions.unshift('Add error scenarios', 'Include activation boxes');
-      } else if (content.includes('class')) {
-        suggestions.unshift('Add method parameters', 'Include inheritance relationships');
-      }
+      return generateSuggestions(currentDiagram.content);
     }
-
-    return suggestions.slice(0, 6);
+    
+    return [
+      'Create a simple flowchart',
+      'Make a sequence diagram',
+      'Build a class diagram', 
+      'Design a state diagram',
+      'Add colors and styling',
+      'Show me examples'
+    ];
   }, [currentDiagram]);
 
   // Send a suggestion as a message
