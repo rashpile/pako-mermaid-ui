@@ -14,6 +14,7 @@ export function useDiagram() {
     validationResult,
     isLoading,
     isSaving,
+    savedDiagrams,
     setCurrentDiagram,
     updateDiagramContent,
     setEditorState,
@@ -25,7 +26,8 @@ export function useDiagram() {
     duplicateDiagram,
     resetEditor,
     setLoading,
-    setSaving
+    setSaving,
+    loadSavedDiagrams
   } = useDiagramStore();
 
   // Debounced validation function
@@ -126,12 +128,17 @@ export function useDiagram() {
     resetEditor();
   }, [resetEditor]);
 
-  // Auto-validate when content changes
-  useEffect(() => {
-    if (editorState.content) {
-      validateDiagram(editorState.content);
-    }
-  }, [editorState.content, validateDiagram]);
+  // Clear current diagram (alias for reset)
+  const clearDiagram = useCallback(() => {
+    resetEditor();
+  }, [resetEditor]);
+
+  // Auto-validate when content changes (temporarily disabled to prevent flickering)
+  // useEffect(() => {
+  //   if (editorState.content) {
+  //     validateDiagram(editorState.content);
+  //   }
+  // }, [editorState.content]);
 
   return {
     // State
@@ -143,6 +150,7 @@ export function useDiagram() {
     validationResult,
     isLoading,
     isSaving,
+    savedDiagrams,
     
     // Actions
     updateContent,
@@ -151,9 +159,15 @@ export function useDiagram() {
     createNew,
     save,
     load,
+    loadDiagram: load,
     deleteDiagram,
     duplicate,
     reset,
+    clearDiagram,
+    
+    // Additional methods needed by components
+    saveDiagram: save,
+    currentDiagram: currentDiagram,
     
     // Validation
     validateDiagram: (content: string) => validateDiagram(content)

@@ -43,7 +43,9 @@ const createInitialDiagram = (name: string = 'Untitled Diagram'): DiagramData =>
   id: generateId(),
   name,
   content: DEFAULT_DIAGRAM,
+  created: new Date(),
   createdAt: new Date(),
+  lastModified: new Date(),
   updatedAt: new Date()
 });
 
@@ -87,6 +89,7 @@ export const useDiagramStore = create<DiagramStore>()(
         const updatedDiagram = {
           ...currentDiagram,
           content,
+          lastModified: new Date(),
           updatedAt: new Date()
         };
         set({ 
@@ -209,7 +212,9 @@ export const useDiagramStore = create<DiagramStore>()(
           ...originalDiagram,
           id: generateId(),
           name: `${originalDiagram.name} (Copy)`,
+          created: new Date(),
           createdAt: new Date(),
+          lastModified: new Date(),
           updatedAt: new Date()
         };
 

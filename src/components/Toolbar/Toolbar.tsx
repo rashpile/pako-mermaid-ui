@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSettingsStore } from '../../store/settingsStore';
 import { useDiagram } from '../../hooks/useDiagram';
 import { ExportButtons } from './ExportButtons';
@@ -13,13 +13,13 @@ interface ToolbarProps {
 
 export function Toolbar({ className = '' }: ToolbarProps) {
   const { settings, layoutSettings, updateLayoutSettings } = useSettingsStore();
-  const { currentDiagram, clearDiagram } = useDiagram();
+  const { currentDiagram, content, clearDiagram } = useDiagram();
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showLoadDialog, setShowLoadDialog] = useState(false);
 
   // Handle new diagram
   const handleNew = () => {
-    if (currentDiagram.content.trim() && 
+    if (content.trim() && 
         !confirm('Create a new diagram? Current changes will be lost.')) {
       return;
     }
@@ -28,7 +28,7 @@ export function Toolbar({ className = '' }: ToolbarProps) {
 
   // Handle save
   const handleSave = () => {
-    if (!currentDiagram.content.trim()) {
+    if (!content.trim()) {
       alert('Cannot save an empty diagram');
       return;
     }
@@ -97,7 +97,7 @@ export function Toolbar({ className = '' }: ToolbarProps) {
 
           <button
             onClick={handleSave}
-            disabled={!currentDiagram.content.trim()}
+            disabled={!content.trim()}
             className="px-3 py-1.5 text-sm bg-green-500 text-white rounded hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
             title="Save diagram (Ctrl+S)"
           >
@@ -125,13 +125,13 @@ export function Toolbar({ className = '' }: ToolbarProps) {
 
         {/* Center section - Diagram info */}
         <div className="flex items-center space-x-4">
-          {currentDiagram.name && (
+          {currentDiagram?.name && (
             <span className="text-sm text-gray-600 dark:text-gray-400">
               {currentDiagram.name}
             </span>
           )}
           
-          {currentDiagram.lastModified && (
+          {currentDiagram?.lastModified && (
             <span className="text-xs text-gray-500 dark:text-gray-500">
               Modified: {new Date(currentDiagram.lastModified).toLocaleTimeString()}
             </span>

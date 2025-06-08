@@ -36,7 +36,7 @@ declare module 'mermaid' {
   export function initialize(config: MermaidConfig): void;
   export function render(id: string, definition: string, svgContainingElement?: Element): Promise<RenderResult>;
   export function parse(definition: string): boolean;
-  export function mermaidAPI: {
+  export const mermaidAPI: {
     initialize(config: MermaidConfig): void;
     render(id: string, definition: string): Promise<RenderResult>;
     parse(definition: string): boolean;

@@ -5,7 +5,10 @@
       "Bash(mkdir:*)",
       "Bash(npm install)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(npm run build:*)",
+      "Bash(grep:*)"
     ],
     "deny": []
   }

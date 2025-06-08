@@ -77,8 +77,7 @@ export interface HttpResponse<T = unknown> {
   headers: Record<string, string>;
 }
 
-export interface HttpError {
-  message: string;
+export class HttpError extends Error {
   status?: number;
   code?: string;
   response?: {
@@ -86,6 +85,14 @@ export interface HttpError {
     status: number;
     statusText: string;
   };
+
+  constructor(message: string, status?: number, code?: string, response?: any) {
+    super(message);
+    this.name = 'HttpError';
+    this.status = status;
+    this.code = code;
+    this.response = response;
+  }
 }
 
 // Retry configuration

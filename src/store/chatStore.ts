@@ -11,7 +11,7 @@ interface ChatStore extends ChatState {
   updateLastMessage: (content: string, metadata?: ChatMessage['metadata']) => void;
   setCurrentInput: (input: string) => void;
   setLoading: (loading: boolean) => void;
-  setError: (error: string | null) => void;
+  setError: (error: string | undefined) => void;
   clearMessages: () => void;
   deleteMessage: (id: string) => void;
   retryLastMessage: () => void;
@@ -47,7 +47,7 @@ export const useChatStore = create<ChatStore>()(
     // Initial state
     messages: [],
     isLoading: false,
-    error: null,
+    error: undefined,
     currentInput: '',
     isVisible: false,
 
@@ -56,7 +56,7 @@ export const useChatStore = create<ChatStore>()(
       const message = createMessage(role, content, metadata);
       set(state => ({
         messages: [...state.messages, message],
-        error: null // Clear any previous errors when adding new message
+        error: undefined // Clear any previous errors when adding new message
       }));
     },
 
@@ -79,7 +79,7 @@ export const useChatStore = create<ChatStore>()(
 
     setLoading: (loading) => set({ 
       isLoading: loading,
-      error: loading ? null : get().error // Clear error when starting to load
+      error: loading ? undefined : get().error // Clear error when starting to load
     }),
 
     setError: (error) => set({ 
@@ -89,7 +89,7 @@ export const useChatStore = create<ChatStore>()(
 
     clearMessages: () => set({ 
       messages: [],
-      error: null,
+      error: undefined,
       currentInput: ''
     }),
 
@@ -112,7 +112,7 @@ export const useChatStore = create<ChatStore>()(
           set(state => ({
             messages: state.messages.slice(0, i + 1),
             currentInput: userMessage.content,
-            error: null
+            error: undefined
           }));
           break;
         }

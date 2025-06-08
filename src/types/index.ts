@@ -5,7 +5,10 @@ export interface DiagramData {
   id: string;
   name: string;
   content: string;
+  description?: string;
+  created: Date;
   createdAt: Date;
+  lastModified: Date;
   updatedAt: Date;
 }
 
@@ -20,6 +23,16 @@ export interface MermaidError {
   message: string;
   line?: number;
   column?: number;
+}
+
+export interface MermaidValidationResult {
+  isValid: boolean;
+  error?: {
+    message: string;
+    line?: number;
+    column?: number;
+  };
+  warnings?: string[];
 }
 
 // Export formats

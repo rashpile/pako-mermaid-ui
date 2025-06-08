@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import mermaid from 'mermaid';
 import { useDiagram } from '../../hooks/useDiagram';
 import { useMermaidTheme } from '../../hooks/useTheme';
@@ -25,6 +25,7 @@ export function MermaidPreview({
   const debouncedContent = useDebounce(content, 500);
   
   const containerRef = useRef<HTMLDivElement>(null);
+  const isMountedRef = useRef(true);
   const [isRendering, setIsRendering] = useState(false);
   const [renderError, setRenderError] = useState<string | null>(null);
   const [renderedSvg, setRenderedSvg] = useState<string>('');
@@ -40,21 +41,24 @@ export function MermaidPreview({
       startOnLoad: false,
       suppressErrorRendering: true,
       maxTextSize: 90000,
-      maxEdges: 500,
-      maxWidth: 200
+      maxEdges: 500
     });
   }, [mermaidConfig]);
 
   // Render diagram when content changes
   const renderDiagram = useCallback(async () => {
-    if (!containerRef.current || !debouncedContent.trim()) {
-      setRenderedSvg('');
-      setRenderError(null);
+    if (!containerRef.current || !debouncedContent.trim() || !isMountedRef.current) {
+      if (isMountedRef.current) {
+        setRenderedSvg('');
+        setRenderError(null);
+      }
       return;
     }
 
-    setIsRendering(true);
-    setRenderError(null);
+    if (isMountedRef.current) {
+      setIsRendering(true);
+      setRenderError(null);
+    }
 
     try {
       // Validate syntax first
@@ -76,10 +80,9 @@ export function MermaidPreview({
         containerRef.current.innerHTML = svg;
         setRenderedSvg(svg);
         
-        // Apply zoom and pan
+        // Apply initial transform
         const svgElement = containerRef.current.querySelector('svg');
         if (svgElement) {
-          svgElement.style.transform = `scale(${zoom}) translate(${panPosition.x}px, ${panPosition.y}px)`;
           svgElement.style.transformOrigin = 'center center';
           svgElement.style.transition = 'transform 0.2s ease';
         }
@@ -109,14 +112,16 @@ export function MermaidPreview({
         `;
       }
     } finally {
-      setIsRendering(false);
+      if (isMountedRef.current) {
+        setIsRendering(false);
+      }
     }
-  }, [debouncedContent, zoom, panPosition, onRenderComplete, onRenderError]);
+  }, [debouncedContent, onRenderComplete, onRenderError]);
 
-  // Re-render when content or theme changes
+  // Re-render when debounced content changes
   useEffect(() => {
     renderDiagram();
-  }, [renderDiagram]);
+  }, [debouncedContent]);
 
   // Handle zoom controls
   const handleZoomIn = useCallback(() => {
@@ -190,6 +195,21 @@ export function MermaidPreview({
     }
   }, [zoom, panPosition]);
 
+  // Cleanup effect for proper container disposal
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+      try {
+        if (containerRef.current) {
+          // Clear the container safely
+          containerRef.current.innerHTML = '';
+        }
+      } catch (error) {
+        console.debug('Mermaid cleanup error (ignored):', error);
+      }
+    };
+  }, []);
+
   // Get current validation status
   const getValidationStatus = useCallback((): MermaidValidationResult => {
     if (renderError) {
@@ -225,23 +245,24 @@ export function MermaidPreview({
         />
       )}
       
-      <div 
-        ref={containerRef}
-        className={`mermaid-container ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        onWheel={handleWheel}
-        style={{
-          height: showControls ? 'calc(100% - 60px)' : '100%',
-          overflow: 'hidden',
-          position: 'relative',
-          backgroundColor: 'var(--color-surface)',
-          borderRadius: '0.5rem',
-          border: '1px solid var(--color-border)'
-        }}
-      >
+        <div 
+          ref={containerRef}
+          className={`mermaid-container ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+          onWheel={handleWheel}
+          style={{
+            height: showControls ? 'calc(100% - 60px)' : '100%',
+            overflow: 'hidden',
+            position: 'relative',
+            backgroundColor: 'white',
+            borderRadius: '0.5rem',
+            border: '1px solid #e5e7eb',
+            minHeight: '300px'
+          }}
+        >
         {isRendering && (
           <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-20 z-10">
             <div className="flex items-center space-x-2 text-sm">
@@ -260,7 +281,7 @@ export function MermaidPreview({
             </div>
           </div>
         )}
-      </div>
+        </div>
       
       {!currentValidation.isValid && currentValidation.error && (
         <ErrorDisplay 

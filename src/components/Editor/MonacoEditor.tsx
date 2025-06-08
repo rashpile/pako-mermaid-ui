@@ -1,9 +1,8 @@
-import React, { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback } from 'react';
 import Editor, { Monaco } from '@monaco-editor/react';
 import { useDiagram } from '../../hooks/useDiagram';
 import { useTheme } from '../../hooks/useTheme';
 import { useSettingsStore } from '../../store/settingsStore';
-import { debounce } from '../../utils/debounce';
 
 interface MonacoEditorProps {
   className?: string;
@@ -141,86 +140,81 @@ export function MonacoEditor({
     }
   }, [onMount]);
 
-  // Handle editor mount
-  const handleEditorDidMount = useCallback((editor: any, monaco: Monaco) => {
-    editorRef.current = editor;
-    configureMonaco(monaco);
-
-    // Set language to Mermaid
-    const model = editor.getModel();
-    if (model) {
-      monaco.editor.setModelLanguage(model, 'mermaid');
-    }
-
-    // Focus the editor
-    editor.focus();
-
-    // Set up error decorations
-    updateErrorDecorations();
-  }, [configureMonaco]);
-
   // Update error decorations based on validation result
   const updateErrorDecorations = useCallback(() => {
-    if (!editorRef.current || !monacoRef.current) return;
+    try {
+      if (!editorRef.current || !monacoRef.current) return;
 
-    const editor = editorRef.current;
-    const monaco = monacoRef.current;
-    const model = editor.getModel();
-    
-    if (!model) return;
+      const editor = editorRef.current;
+      const monaco = monacoRef.current;
+      const model = editor.getModel();
+      
+      if (!model || editor._isDisposed) return;
 
-    // Clear existing decorations
-    const decorations = editor.getModel()?.getAllDecorations() || [];
-    const errorDecorations = decorations.filter((d: any) => d.options.className?.includes('error'));
-    
-    if (errorDecorations.length > 0) {
-      editor.removeDecorations(errorDecorations.map((d: any) => d.id));
-    }
+      // Clear existing decorations
+      const decorations = editor.getModel()?.getAllDecorations() || [];
+      const errorDecorations = decorations.filter((d: any) => d.options.className?.includes('error'));
+      
+      if (errorDecorations.length > 0) {
+        editor.removeDecorations(errorDecorations.map((d: any) => d.id));
+      }
 
-    // Add error decoration if there's an error
-    if (!isValid && error) {
-      const lineCount = model.getLineCount();
-      editor.addDecoration({
-        range: new monaco.Range(1, 1, lineCount, 1),
-        options: {
-          className: 'monaco-error-decoration',
-          hoverMessage: { value: error },
-          glyphMarginClassName: 'monaco-error-glyph'
-        }
-      });
+      // Add error decoration if there's an error
+      if (!isValid && error) {
+        const lineCount = model.getLineCount();
+        editor.addDecoration({
+          range: new monaco.Range(1, 1, lineCount, 1),
+          options: {
+            className: 'monaco-error-decoration',
+            hoverMessage: { value: error },
+            glyphMarginClassName: 'monaco-error-glyph'
+          }
+        });
+      }
+    } catch (error) {
+      console.debug('Monaco decoration error (ignored):', error);
     }
   }, [isValid, error]);
 
+  // Handle editor mount
+  const handleEditorDidMount = useCallback((editor: any, monaco: Monaco) => {
+    try {
+      editorRef.current = editor;
+      configureMonaco(monaco);
+
+      // Set language to Mermaid
+      const model = editor.getModel();
+      if (model) {
+        monaco.editor.setModelLanguage(model, 'mermaid');
+      }
+
+      // Focus the editor
+      editor.focus();
+
+      // Set up error decorations
+      updateErrorDecorations();
+    } catch (error) {
+      console.debug('Monaco editor mount error (ignored):', error);
+    }
+  }, [configureMonaco, updateErrorDecorations]);
+
   // Update decorations when validation changes
   useEffect(() => {
-    updateErrorDecorations();
+    try {
+      updateErrorDecorations();
+    } catch (error) {
+      console.debug('Monaco decoration update error (ignored):', error);
+    }
   }, [updateErrorDecorations]);
 
-  // Debounced content change handler
-  const debouncedContentChange = useCallback(
-    debounce((value: string) => {
-      updateContent(value);
-    }, 300),
-    [updateContent]
-  );
 
   // Handle content changes
   const handleChange = useCallback((value: string | undefined) => {
     if (value !== undefined) {
-      debouncedContentChange(value);
+      updateContent(value);
     }
-  }, [debouncedContentChange]);
+  }, [updateContent]);
 
-  // Handle cursor position changes
-  const handleCursorPositionChange = useCallback(() => {
-    if (editorRef.current) {
-      const position = editorRef.current.getPosition();
-      if (position) {
-        const offset = editorRef.current.getModel()?.getOffsetAt(position) || 0;
-        updateCursorPosition(offset);
-      }
-    }
-  }, [updateCursorPosition]);
 
   // Get current theme for Monaco
   const getMonacoTheme = useCallback(() => {
@@ -230,11 +224,34 @@ export function MonacoEditor({
     return 'mermaid-light';
   }, [resolvedTheme]);
 
+  // Cleanup effect for proper editor disposal
+  useEffect(() => {
+    return () => {
+      // Use a timeout to ensure all async operations complete
+      setTimeout(() => {
+        try {
+          if (editorRef.current) {
+            const editor = editorRef.current;
+            // Check if editor is still valid before disposing
+            if (typeof editor.dispose === 'function' && !editor._isDisposed) {
+              editor.dispose();
+            }
+            editorRef.current = null;
+          }
+          monacoRef.current = null;
+        } catch (error) {
+          // Silently handle disposal errors as they're often benign
+          console.debug('Monaco cleanup error (ignored):', error);
+        }
+      }, 0);
+    };
+  }, []);
+
   return (
     <div className={`monaco-editor-container ${className}`}>
       <Editor
-        height={height}
-        width={width}
+        height="100%"
+        width="100%"
         language="mermaid"
         theme={getMonacoTheme()}
         value={content}
@@ -271,27 +288,28 @@ export function MonacoEditor({
           },
           // Performance optimizations
           renderControlCharacters: false,
-          renderIndentGuides: true,
           cursorBlinking: 'smooth',
           cursorSmoothCaretAnimation: 'on'
         }}
-        onCursorPositionChange={handleCursorPositionChange}
       />
       
       {/* Custom styles for error decorations */}
-      <style jsx>{`
+      <style>{`
         .monaco-editor-container {
           position: relative;
           border-radius: 0.5rem;
           overflow: hidden;
+          height: 100%;
+          width: 100%;
+          min-height: 200px;
         }
         
-        :global(.monaco-error-decoration) {
+        .monaco-error-decoration {
           background-color: rgba(255, 0, 0, 0.1);
           border-bottom: 2px wavy red;
         }
         
-        :global(.monaco-error-glyph) {
+        .monaco-error-glyph {
           background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iOCIgY3k9IjgiIHI9IjgiIGZpbGw9IiNGRjAwMDAiLz4KPHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iMTIiIHZpZXdCb3g9IjAgMCAxMiAxMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTYgMkw2IDdNNiA5TDYgMTAiIHN0cm9rZT0iI0ZGRkZGRiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KPC9zdmc+) center center no-repeat;
         }
       `}</style>
