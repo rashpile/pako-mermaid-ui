@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { subscribeWithSelector } from 'zustand/middleware';
 import { DiagramData, EditorState, MermaidValidationResult } from '../types';
 import { saveDiagram, getSavedDiagrams, deleteDiagram, getDiagramById } from '../utils/storage';
 import { DEFAULT_DIAGRAM } from '../constants/examples';
@@ -59,8 +58,7 @@ function generateId(): string {
   return `diagram_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
-export const useDiagramStore = create<DiagramStore>()(
-  subscribeWithSelector((set, get) => ({
+export const useDiagramStore = create<DiagramStore>()((set, get) => ({
     // Initial state
     currentDiagram: createInitialDiagram(),
     editorState: createInitialEditorState(),
@@ -240,8 +238,7 @@ export const useDiagramStore = create<DiagramStore>()(
 
     setLoading: (loading) => set({ isLoading: loading }),
     setSaving: (saving) => set({ isSaving: saving })
-  }))
-);
+  }));
 
 // Selector hooks for optimized component re-renders
 export const useCurrentDiagram = () => useDiagramStore(state => state.currentDiagram);

@@ -1,8 +1,6 @@
 import { useCallback } from 'react';
 import { useDiagramStore } from '../store/diagramStore';
-import { chatService } from '../services/chatService';
-import { debounce } from '../utils/debounce';
-import { DiagramData, MermaidValidationResult } from '../types';
+import { DiagramData } from '../types';
 
 /**
  * Custom hook for managing diagram content, validation, and operations
@@ -30,41 +28,10 @@ export function useDiagram() {
     loadSavedDiagrams
   } = useDiagramStore();
 
-  // Debounced validation function
-  const validateDiagram = useCallback(
-    debounce(async (content: string) => {
-      if (!content.trim()) {
-        setValidationResult({
-          isValid: false,
-          error: { message: 'Diagram cannot be empty' }
-        });
-        return;
-      }
-
-      try {
-        const result = await chatService.validateDiagram(content);
-        setValidationResult({
-          isValid: result.isValid,
-          error: result.errors.length > 0 ? { message: result.errors[0] } : undefined,
-          warnings: result.errors.slice(1)
-        });
-      } catch (error) {
-        setValidationResult({
-          isValid: false,
-          error: { 
-            message: error instanceof Error ? error.message : 'Validation failed' 
-          }
-        });
-      }
-    }, 500),
-    [setValidationResult]
-  );
-
-  // Update diagram content with validation
+  // Simple update function without validation to stop infinite loops
   const updateContent = useCallback((content: string) => {
     updateDiagramContent(content);
-    validateDiagram(content);
-  }, [updateDiagramContent, validateDiagram]);
+  }, [updateDiagramContent]);
 
   // Update cursor position
   const updateCursorPosition = useCallback((position: number) => {
@@ -169,7 +136,7 @@ export function useDiagram() {
     saveDiagram: save,
     currentDiagram: currentDiagram,
     
-    // Validation
-    validateDiagram: (content: string) => validateDiagram(content)
+    // Validation - disabled for now
+    validateDiagram: (content: string) => {}
   };
 }

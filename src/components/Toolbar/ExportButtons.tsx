@@ -85,7 +85,7 @@ export function ExportButtons() {
       {/* Export dropdown */}
       <div className="relative group">
         <button
-          disabled={isExporting || !currentDiagram.content.trim()}
+          disabled={isExporting || !currentDiagram?.content?.trim()}
           className="px-3 py-1.5 text-sm bg-gray-500 text-white rounded hover:bg-gray-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center"
           title="Export diagram"
         >

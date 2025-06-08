@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback, memo } from 'react';
 import Editor, { Monaco } from '@monaco-editor/react';
 import { useDiagram } from '../../hooks/useDiagram';
 import { useTheme } from '../../hooks/useTheme';
@@ -12,7 +12,7 @@ interface MonacoEditorProps {
   onMount?: (editor: Monaco) => void;
 }
 
-export function MonacoEditor({
+function MonacoEditorComponent({
   className = '',
   height = '100%',
   width = '100%',
@@ -316,3 +316,5 @@ export function MonacoEditor({
     </div>
   );
 }
+
+export const MonacoEditor = memo(MonacoEditorComponent);

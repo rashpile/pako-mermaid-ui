@@ -88,7 +88,7 @@ export function useThemeClasses() {
 export function useMermaidTheme() {
   const { resolvedTheme } = useTheme();
 
-  const getMermaidTheme = useCallback(() => {
+  const getMermaidTheme = useCallback((): 'default' | 'dark' => {
     return resolvedTheme === 'light' ? 'default' : 'dark';
   }, [resolvedTheme]);
 
