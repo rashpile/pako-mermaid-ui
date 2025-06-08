@@ -42,28 +42,28 @@
   - **Step Dependencies**: Step 3
   - **User Instructions**: None
 
-- [ ] Step 5: Create utility functions and constants
+- [x] Step 5: Create utility functions and constants
   - **Task**: Implement helper functions for debouncing, storage, example diagrams, and AI prompt engineering
   - **Files**:
-    - `src/utils/debounce.ts`: Debounce function implementation
-    - `src/utils/storage.ts`: Local storage helper functions
-    - `src/utils/export.ts`: Export functionality (PNG, SVG, PDF)
-    - `src/constants/examples.ts`: Predefined example Mermaid diagrams
-    - `src/constants/themes.ts`: Theme definitions
-    - `src/prompts/systemPrompts.ts`: AI system prompts for Mermaid generation
-    - `src/prompts/examples.ts`: Example prompts and responses for AI training
+    - `src/utils/debounce.ts`: Debounce, debounceAsync, and throttle functions with TypeScript support
+    - `src/utils/storage.ts`: Local storage helper functions with error handling and diagram-specific operations
+    - `src/utils/export.ts`: Export functionality (PNG, SVG, PDF) using html2canvas and jsPDF
+    - `src/constants/examples.ts`: 10 predefined example Mermaid diagrams with tutorial content
+    - `src/constants/themes.ts`: Theme definitions, color palettes, and CSS variables for light/dark modes
+    - `src/prompts/systemPrompts.ts`: Comprehensive AI system prompts for diagram generation and modification
+    - `src/prompts/examples.ts`: Example prompts, responses, and intent categorization for AI training
   - **Step Dependencies**: Step 4
   - **User Instructions**: None
 
 ## Custom Hooks and State Management
-- [ ] Step 6: Create Zustand store and AI service infrastructure
+- [x] Step 6: Create Zustand store and AI service infrastructure
   - **Task**: Set up global state management and OpenAI API service
   - **Files**:
-    - `src/store/diagramStore.ts`: Zustand store for diagram state
-    - `src/store/chatStore.ts`: Zustand store for current chat state
-    - `src/store/settingsStore.ts`: Zustand store for app settings and API keys
-    - `src/services/openaiService.ts`: OpenAI API integration service
-    - `src/services/chatService.ts`: Chat message processing service
+    - `src/store/diagramStore.ts`: Zustand store for diagram state with CRUD operations and validation
+    - `src/store/chatStore.ts`: Zustand store for current chat state with message management
+    - `src/store/settingsStore.ts`: Zustand store for app settings, API keys, and layout with persistence
+    - `src/services/openaiService.ts`: OpenAI API integration service with validation and error handling
+    - `src/services/chatService.ts`: Chat message processing service with debounced requests and intent analysis
   - **Step Dependencies**: Step 5
   - **User Instructions**: None
 
