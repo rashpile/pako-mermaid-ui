@@ -5,12 +5,21 @@ import { ApiKeyState } from '../types/chat';
 import { DEFAULT_SETTINGS, resolveTheme, applyTheme } from '../constants/themes';
 import { saveSettings, getSettings, saveApiKey, getApiKey, removeApiKey, saveLayout, getLayout } from '../utils/storage';
 
+interface LayoutSettings {
+  leftPanelSize: number;
+  centerPanelSize: number;
+  rightPanelSize: number;
+  showLeftPanel: boolean;
+  showRightPanel: boolean;
+}
+
 interface SettingsStore {
   // App settings
   settings: AppSettings;
   
   // Layout state
   layout: LayoutState;
+  layoutSettings: LayoutSettings;
   
   // API key management
   apiKey: ApiKeyState;
@@ -26,6 +35,7 @@ interface SettingsStore {
   
   // Actions for layout
   updateLayout: (layout: Partial<LayoutState>) => void;
+  updateLayoutSettings: (settings: Partial<LayoutSettings>) => void;
   updatePanelConfig: (panel: keyof LayoutState, config: Partial<PanelConfig>) => void;
   togglePanelVisibility: (panel: keyof LayoutState) => void;
   resetLayout: () => void;
@@ -43,6 +53,14 @@ const DEFAULT_LAYOUT: LayoutState = {
   chat: { isVisible: false, size: 20 }
 };
 
+const DEFAULT_LAYOUT_SETTINGS: LayoutSettings = {
+  leftPanelSize: 33,
+  centerPanelSize: 34,
+  rightPanelSize: 33,
+  showLeftPanel: true,
+  showRightPanel: false
+};
+
 const INITIAL_API_KEY_STATE: ApiKeyState = {
   hasKey: false,
   isValid: undefined,
@@ -55,6 +73,7 @@ export const useSettingsStore = create<SettingsStore>()(
       // Initial state
       settings: DEFAULT_SETTINGS,
       layout: DEFAULT_LAYOUT,
+      layoutSettings: DEFAULT_LAYOUT_SETTINGS,
       apiKey: {
         ...INITIAL_API_KEY_STATE,
         hasKey: !!getApiKey()
@@ -116,6 +135,11 @@ export const useSettingsStore = create<SettingsStore>()(
         saveLayout(updatedLayout);
       },
 
+      updateLayoutSettings: (newSettings) => {
+        const updatedSettings = { ...get().layoutSettings, ...newSettings };
+        set({ layoutSettings: updatedSettings });
+      },
+
       updatePanelConfig: (panel, config) => {
         const { layout } = get();
         const updatedLayout = {
@@ -133,7 +157,10 @@ export const useSettingsStore = create<SettingsStore>()(
       },
 
       resetLayout: () => {
-        set({ layout: DEFAULT_LAYOUT });
+        set({ 
+          layout: DEFAULT_LAYOUT,
+          layoutSettings: DEFAULT_LAYOUT_SETTINGS 
+        });
         saveLayout(DEFAULT_LAYOUT);
       },
 
@@ -213,7 +240,8 @@ export const useSettingsStore = create<SettingsStore>()(
       name: 'mermaid-editor-settings',
       partialize: (state) => ({
         settings: state.settings,
-        layout: state.layout
+        layout: state.layout,
+        layoutSettings: state.layoutSettings
         // Don't persist API key state - it's managed separately for security
       })
     }
