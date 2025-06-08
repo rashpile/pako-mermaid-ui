@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useDiagramStore } from '../store/diagramStore';
 import { chatService } from '../services/chatService';
 import { debounce } from '../utils/debounce';
@@ -133,13 +133,13 @@ export function useDiagram() {
     resetEditor();
   }, [resetEditor]);
 
-  // Auto-validate when content changes (temporarily disabled to prevent flickering)
+  // Auto-validate when content changes
   // useEffect(() => {
   //   if (editorState.content) {
   //     validateDiagram(editorState.content);
   //   }
-  // }, [editorState.content]);
-
+  // }, [editorState.content, validateDiagram]);
+  
   return {
     // State
     diagram: currentDiagram,

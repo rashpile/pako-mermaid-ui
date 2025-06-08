@@ -24,8 +24,8 @@ export function MermaidPreview({
   const { mermaidConfig } = useMermaidTheme();
   const debouncedContent = useDebounce(content, 500);
   
+  
   const containerRef = useRef<HTMLDivElement>(null);
-  const isMountedRef = useRef(true);
   const [isRendering, setIsRendering] = useState(false);
   const [renderError, setRenderError] = useState<string | null>(null);
   const [renderedSvg, setRenderedSvg] = useState<string>('');
@@ -47,18 +47,14 @@ export function MermaidPreview({
 
   // Render diagram when content changes
   const renderDiagram = useCallback(async () => {
-    if (!containerRef.current || !debouncedContent.trim() || !isMountedRef.current) {
-      if (isMountedRef.current) {
-        setRenderedSvg('');
-        setRenderError(null);
-      }
+    if (!containerRef.current || !debouncedContent.trim()) {
+      setRenderedSvg('');
+      setRenderError(null);
       return;
     }
 
-    if (isMountedRef.current) {
-      setIsRendering(true);
-      setRenderError(null);
-    }
+    setIsRendering(true);
+    setRenderError(null);
 
     try {
       // Validate syntax first
@@ -112,16 +108,14 @@ export function MermaidPreview({
         `;
       }
     } finally {
-      if (isMountedRef.current) {
-        setIsRendering(false);
-      }
+      setIsRendering(false);
     }
   }, [debouncedContent, onRenderComplete, onRenderError]);
 
   // Re-render when debounced content changes
   useEffect(() => {
     renderDiagram();
-  }, [debouncedContent]);
+  }, [debouncedContent, renderDiagram]);
 
   // Handle zoom controls
   const handleZoomIn = useCallback(() => {
@@ -198,7 +192,6 @@ export function MermaidPreview({
   // Cleanup effect for proper container disposal
   useEffect(() => {
     return () => {
-      isMountedRef.current = false;
       try {
         if (containerRef.current) {
           // Clear the container safely
