@@ -80,20 +80,20 @@
   - **User Instructions**: None
 
 ## Core Components - Editor
-- [ ] Step 8: Implement Monaco Editor component
+- [x] Step 8: Implement Monaco Editor component
   - **Task**: Create a wrapper component for Monaco Editor with Mermaid syntax highlighting
   - **Files**:
-    - `src/components/Editor/MonacoEditor.tsx`: Monaco Editor wrapper component
+    - `src/components/Editor/MonacoEditor.tsx`: Monaco Editor wrapper with Mermaid language support, syntax highlighting, error decorations, and theme integration
     - `src/components/Editor/index.ts`: Export barrel file
   - **Step Dependencies**: Step 7
   - **User Instructions**: None
 
-- [ ] Step 9: Implement Mermaid Preview component
+- [x] Step 9: Implement Mermaid Preview component
   - **Task**: Create component that renders Mermaid diagrams with error handling
   - **Files**:
-    - `src/components/Preview/MermaidPreview.tsx`: Mermaid rendering component
-    - `src/components/Preview/PreviewControls.tsx`: Zoom and pan controls
-    - `src/components/Preview/ErrorDisplay.tsx`: Error message component
+    - `src/components/Preview/MermaidPreview.tsx`: Mermaid rendering with zoom/pan, validation, debounced updates, and theme integration
+    - `src/components/Preview/PreviewControls.tsx`: Zoom controls and export functionality (PNG, SVG, PDF)
+    - `src/components/Preview/ErrorDisplay.tsx`: Error and warning display with expandable warnings and help links
     - `src/components/Preview/index.ts`: Export barrel file
   - **Step Dependencies**: Step 7
   - **User Instructions**: None
