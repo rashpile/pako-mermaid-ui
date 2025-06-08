@@ -92,9 +92,11 @@ export function useChat() {
     getConversationHistory
   ]);
 
-  // Debounced send message for rapid typing
+  // Debounced send message for rapid typing (non-async version)
   const sendMessageDebounced = useDebouncedCallback(
-    sendMessage, 
+    (message: string) => {
+      sendMessage(message); // Fire and forget for debounced version
+    }, 
     300, 
     [sendMessage]
   );
