@@ -29,27 +29,9 @@ function MermaidPreviewComponent({
   const error = undefined;
   const validationResult = null;
   
-  const [previewContent, setPreviewContent] = useState(content);
-  const [shouldRender, setShouldRender] = useState(false);
-  
-  // Manual update function
-  const updatePreview = useCallback(() => {
-    console.log('[MermaidPreview] Manual update triggered');
-    console.log('[MermaidPreview] Setting previewContent to:', content?.slice(0, 50) + '...');
-    setPreviewContent(content);
-    console.log('[MermaidPreview] Setting shouldRender to true');
-    setShouldRender(true);
-  }, [content]);
-  
-  // Check if content has changed since last preview update
-  const hasContentChanged = content !== previewContent;
-  
-  // Expose update function to parent
-  useEffect(() => {
-    if (onUpdateAvailable) {
-      onUpdateAvailable(updatePreview);
-    }
-  }, [onUpdateAvailable, updatePreview]);
+  // Track the last rendered content to avoid unnecessary re-renders
+  const [lastRenderedContent, setLastRenderedContent] = useState('');
+  const [renderVersion, setRenderVersion] = useState(0); // Force render trigger
   
   const containerRef = useRef<HTMLDivElement>(null);
   const [isRendering, setIsRendering] = useState(false);
@@ -59,6 +41,23 @@ function MermaidPreviewComponent({
   const [panPosition, setPanPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
+  // Manual update function - now forces a render even with same content
+  const updatePreview = useCallback(() => {
+    console.log('[MermaidPreview] Manual update triggered');
+    // Increment version to force a re-render
+    setRenderVersion(v => v + 1);
+  }, []);
+  
+  // Check if content has changed since last render
+  const hasContentChanged = content !== lastRenderedContent;
+  
+  // Expose update function to parent
+  useEffect(() => {
+    if (onUpdateAvailable) {
+      onUpdateAvailable(updatePreview);
+    }
+  }, [onUpdateAvailable, updatePreview]);
 
   // Initialize Mermaid
   useEffect(() => {
@@ -72,31 +71,37 @@ function MermaidPreviewComponent({
     });
   }, []);
 
-  // Render only when manually triggered
+  // Render diagram when content changes OR when manually triggered
   useEffect(() => {
-    console.log('[MermaidPreview] Effect triggered, shouldRender:', shouldRender);
-    if (!shouldRender) return;
+    console.log('[MermaidPreview] Render effect triggered');
+    console.log('[MermaidPreview] Content:', content?.slice(0, 50) + '...');
+    console.log('[MermaidPreview] Last rendered:', lastRenderedContent?.slice(0, 50) + '...');
+    console.log('[MermaidPreview] Render version:', renderVersion);
     
     const renderDiagram = async () => {
-      console.log('[MermaidPreview] Starting renderDiagram');
-      console.log('[MermaidPreview] containerRef.current:', !!containerRef.current);
-      console.log('[MermaidPreview] previewContent:', previewContent?.slice(0, 50) + '...');
-      
-      if (!containerRef.current || !previewContent.trim()) {
-        console.log('[MermaidPreview] Early return - no container or content');
+      // Skip if no content
+      if (!content?.trim()) {
+        console.log('[MermaidPreview] No content to render');
         setRenderedSvg('');
         setRenderError(null);
+        setLastRenderedContent('');
         return;
       }
 
-      console.log('[MermaidPreview] Setting isRendering to true');
+      // Skip if content hasn't changed and this isn't a forced update
+      if (content === lastRenderedContent && renderVersion === 0) {
+        console.log('[MermaidPreview] Content unchanged, skipping render');
+        return;
+      }
+
+      console.log('[MermaidPreview] Starting renderDiagram');
       setIsRendering(true);
       setRenderError(null);
 
       try {
         // Validate syntax first
         console.log('[MermaidPreview] Validating mermaid syntax...');
-        const isValidSyntax = await mermaid.parse(previewContent);
+        const isValidSyntax = await mermaid.parse(content);
         console.log('[MermaidPreview] Syntax validation result:', isValidSyntax);
         if (!isValidSyntax) {
           throw new Error('Invalid Mermaid syntax');
@@ -106,53 +111,40 @@ function MermaidPreviewComponent({
         const diagramId = `mermaid-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
         console.log('[MermaidPreview] Generated diagram ID:', diagramId);
         
-        // Clear the container
-        console.log('[MermaidPreview] Clearing container...');
-        containerRef.current.innerHTML = '';
+        // Create a temporary container for mermaid to render into
+        const tempContainer = document.createElement('div');
+        tempContainer.style.visibility = 'hidden';
+        tempContainer.style.position = 'absolute';
+        tempContainer.style.left = '-9999px';
+        document.body.appendChild(tempContainer);
         
-        // Render the diagram
-        console.log('[MermaidPreview] Calling mermaid.render...');
-        const { svg } = await mermaid.render(diagramId, previewContent);
-        console.log('[MermaidPreview] Mermaid render completed, svg length:', svg?.length);
-        
-        // Store the SVG and let React handle the rendering
-        console.log('[MermaidPreview] Setting rendered SVG in state', svg);
-        
-        setRenderedSvg(svg);
-        
-        if (onRenderComplete) {
-          onRenderComplete(svg);
+        try {
+          // Render the diagram into the temporary container
+          console.log('[MermaidPreview] Calling mermaid.render...');
+          const { svg } = await mermaid.render(diagramId, content, tempContainer);
+          console.log('[MermaidPreview] Mermaid render completed, svg length:', svg?.length);
+          
+          // Store the SVG
+          setRenderedSvg(svg);
+          setLastRenderedContent(content);
+          
+          if (onRenderComplete) {
+            onRenderComplete(svg);
+          }
+        } finally {
+          // Clean up temporary container
+          document.body.removeChild(tempContainer);
         }
-        
-        // Reset render flag after successful render
-        console.log('[MermaidPreview] Resetting shouldRender to false');
-        setShouldRender(false);
       } catch (error) {
         console.log('[MermaidPreview] Error during render:', error);
         const errorMessage = error instanceof Error ? error.message : 'Failed to render diagram';
         setRenderError(errorMessage);
         setRenderedSvg('');
+        setLastRenderedContent(''); // Reset so next attempt will try again
         
         if (onRenderError && error instanceof Error) {
           onRenderError(error);
         }
-        
-        // Display error in container
-        if (containerRef.current) {
-          console.log('[MermaidPreview] Displaying error in container');
-          containerRef.current.innerHTML = `
-            <div class="flex items-center justify-center h-full text-red-500">
-              <div class="text-center">
-                <div class="text-xl mb-2">⚠️</div>
-                <div class="text-sm">${errorMessage}</div>
-              </div>
-            </div>
-          `;
-        }
-        
-        // Reset render flag after error
-        console.log('[MermaidPreview] Resetting shouldRender to false after error');
-        setShouldRender(false);
       } finally {
         console.log('[MermaidPreview] Setting isRendering to false');
         setIsRendering(false);
@@ -160,7 +152,7 @@ function MermaidPreviewComponent({
     };
 
     renderDiagram();
-  }, [shouldRender]);
+  }, [content, renderVersion, onRenderComplete, onRenderError]); // Include renderVersion in dependencies
 
   // Handle zoom controls
   const handleZoomIn = useCallback(() => {
@@ -224,22 +216,6 @@ function MermaidPreviewComponent({
     setZoom(prev => Math.max(0.1, Math.min(3, prev * delta)));
   }, []);
 
-  // Apply transforms when zoom or pan changes - now handled via inline style
-
-  // Cleanup effect for proper container disposal
-  useEffect(() => {
-    return () => {
-      try {
-        if (containerRef.current) {
-          // Clear the container safely
-          containerRef.current.innerHTML = '';
-        }
-      } catch (error) {
-        console.debug('Mermaid cleanup error (ignored):', error);
-      }
-    };
-  }, []);
-
   // Get current validation status
   const getValidationStatus = useCallback((): MermaidValidationResult => {
     if (renderError) {
@@ -277,24 +253,24 @@ function MermaidPreviewComponent({
         />
       )}
       
-        <div 
-          ref={containerRef}
-          className={`mermaid-container ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
-          onWheel={handleWheel}
-          style={{
-            height: showControls ? 'calc(100% - 60px)' : '100%',
-            overflow: 'hidden',
-            position: 'relative',
-            backgroundColor: 'white',
-            borderRadius: '0.5rem',
-            border: '1px solid #e5e7eb',
-            minHeight: '300px'
-          }}
-        >
+      <div 
+        ref={containerRef}
+        className={`mermaid-container ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onWheel={handleWheel}
+        style={{
+          height: showControls ? 'calc(100% - 60px)' : '100%',
+          overflow: 'hidden',
+          position: 'relative',
+          backgroundColor: 'white',
+          borderRadius: '0.5rem',
+          border: '1px solid #e5e7eb',
+          minHeight: '300px'
+        }}
+      >
         {isRendering && (
           <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-20 z-10">
             <div className="flex items-center space-x-2 text-sm">
@@ -306,16 +282,22 @@ function MermaidPreviewComponent({
         
         {renderedSvg && !isRendering && (
           <div 
+            className="mermaid-svg-container"
             dangerouslySetInnerHTML={{ __html: renderedSvg }}
             style={{
               transform: `scale(${zoom}) translate(${panPosition.x / zoom}px, ${panPosition.y / zoom}px)`,
               transformOrigin: 'center center',
-              transition: 'transform 0.2s ease'
+              transition: isDragging ? 'none' : 'transform 0.2s ease',
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
             }}
           />
         )}
         
-        {!previewContent.trim() && !isRendering && !renderedSvg && (
+        {!content?.trim() && !isRendering && (
           <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
             <div className="text-center">
               <div className="text-2xl mb-2">📊</div>
@@ -324,9 +306,18 @@ function MermaidPreviewComponent({
             </div>
           </div>
         )}
-        </div>
+        
+        {renderError && !isRendering && (
+          <div className="flex items-center justify-center h-full text-red-500">
+            <div className="text-center">
+              <div className="text-xl mb-2">⚠️</div>
+              <div className="text-sm">{renderError}</div>
+            </div>
+          </div>
+        )}
+      </div>
       
-      {!currentValidation.isValid && currentValidation.error && (
+      {!currentValidation.isValid && currentValidation.error && !renderError && (
         <ErrorDisplay 
           error={currentValidation.error.message}
           warnings={currentValidation.warnings}
