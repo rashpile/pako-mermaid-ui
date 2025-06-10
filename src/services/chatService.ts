@@ -29,8 +29,20 @@ class ChatService {
         systemPrompt
       );
 
+      console.log('[ChatService] OpenAI generateDiagram result:', {
+        diagram: result.diagram?.substring(0, 100) + '...',
+        explanation: result.explanation?.substring(0, 200) + '...',
+        diagramLength: result.diagram?.length,
+        explanationLength: result.explanation?.length
+      });
+
       // Parse AI response for diagram updates
       const aiResponse = parseAIResponse(result.explanation);
+      console.log('[ChatService] Parsed AI response:', {
+        hasDiagram: !!aiResponse.diagram,
+        confidence: aiResponse.confidence,
+        diagramPreview: aiResponse.diagram?.substring(0, 100) + '...'
+      });
       
       // Validate any generated diagram
       let validationResult = null;
@@ -87,8 +99,16 @@ class ChatService {
         systemPrompt
       );
 
+      console.log('[ChatService] Diagram update result:', {
+        updatedDiagram: result.diagram?.substring(0, 100) + '...',
+        explanation: result.explanation?.substring(0, 200) + '...',
+        originalLength: currentDiagram?.length,
+        updatedLength: result.diagram?.length
+      });
+
       // Analyze changes made
       const changes = this.analyzeChanges(currentDiagram, result.diagram);
+      console.log('[ChatService] Analyzed changes:', changes.length, 'changes detected');
 
       return {
         updatedDiagram: result.diagram,
@@ -118,8 +138,12 @@ class ChatService {
         analysisPrompt
       );
 
+      console.log('[ChatService] Analysis response:', response?.substring(0, 300) + '...');
+
       // Extract suggestions from response
-      return this.extractSuggestions(response);
+      const suggestions = this.extractSuggestions(response);
+      console.log('[ChatService] Extracted suggestions:', suggestions);
+      return suggestions;
     } catch (error) {
       console.error('Diagram analysis failed:', error);
       return [];

@@ -104,7 +104,16 @@ Rules:
         temperature: this.config!.temperature
       });
 
+      console.log('[OpenAI] Raw API response:', {
+        model: response.model,
+        usage: response.usage,
+        choices: response.choices.length,
+        finishReason: response.choices[0]?.finish_reason
+      });
+
       const content = response.choices[0]?.message?.content;
+      console.log('[OpenAI] AI Response Content:', content);
+      
       if (!content) {
         throw new Error('No response from OpenAI');
       }
@@ -117,6 +126,9 @@ Rules:
       const explanation = content
         .replace(/```mermaid\n[\s\S]*?\n```/g, '')
         .trim();
+
+      console.log('[OpenAI] Extracted diagram:', diagram?.substring(0, 100) + '...');
+      console.log('[OpenAI] Extracted explanation:', explanation?.substring(0, 200) + '...');
 
       if (!diagram) {
         throw new Error('No valid Mermaid diagram found in response');
@@ -165,7 +177,16 @@ Rules:
         temperature: this.config!.temperature
       });
 
+      console.log('[OpenAI] Chat API response:', {
+        model: response.model,
+        usage: response.usage,
+        choices: response.choices.length,
+        finishReason: response.choices[0]?.finish_reason
+      });
+
       const content = response.choices[0]?.message?.content;
+      console.log('[OpenAI] Chat Response Content:', content);
+      
       if (!content) {
         throw new Error('No response from OpenAI');
       }

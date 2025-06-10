@@ -10,8 +10,6 @@ interface PreviewControlsProps {
   onFitToScreen: () => void;
   isRendering: boolean;
   canExport: boolean;
-  onUpdatePreview?: () => void;
-  hasContentChanged?: boolean;
 }
 
 export function PreviewControls({
@@ -21,9 +19,7 @@ export function PreviewControls({
   onZoomReset,
   onFitToScreen,
   isRendering,
-  canExport,
-  onUpdatePreview,
-  hasContentChanged
+  canExport
 }: PreviewControlsProps) {
   const handleExport = async (format: ExportFormat) => {
     if (!canExport) return;
@@ -87,24 +83,7 @@ export function PreviewControls({
         </button>
       </div>
 
-      {/* Update Preview Button */}
-      {onUpdatePreview && (
-        <div className="flex items-center">
-          <button
-            onClick={onUpdatePreview}
-            disabled={isRendering || !hasContentChanged}
-            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
-              hasContentChanged 
-                ? 'bg-blue-500 text-white hover:bg-blue-600' 
-                : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-            } disabled:opacity-50 disabled:cursor-not-allowed`}
-            title={hasContentChanged ? 'Update preview with latest changes' : 'Preview is up to date'}
-          >
-            {hasContentChanged ? '🔄 Update Preview' : '✓ Up to Date'}
-          </button>
-        </div>
-      )}
-
+      
       {/* Export Controls */}
       <div className="flex items-center space-x-2">
         <span className="text-sm text-gray-600 dark:text-gray-400">Export:</span>
