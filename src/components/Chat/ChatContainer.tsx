@@ -9,7 +9,6 @@ interface ChatContainerProps {
   isVisible: boolean;
   onToggle: () => void;
   onDiagramUpdate: (diagram: string) => void;
-  currentDiagram: string;
   className?: string;
 }
 
@@ -17,7 +16,6 @@ export function ChatContainer({
   isVisible,
   onToggle,
   onDiagramUpdate,
-  currentDiagram,
   className = ''
 }: ChatContainerProps) {
   const {

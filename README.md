@@ -291,16 +291,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **[React](https://reactjs.org/)** - For the UI framework
 - **[Vite](https://vitejs.dev/)** - For the fast build tool
 
-## 🌟 Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=rashpile/pako-mermaid-ui&type=Date)](https://star-history.com/#rashpile/pako-mermaid-ui&Date)
-
-## 📞 Support
-
-- **Documentation:** [Wiki](https://github.com/rashpile/pako-mermaid-ui/wiki)
-- **Issues:** [GitHub Issues](https://github.com/rashpile/pako-mermaid-ui/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/rashpile/pako-mermaid-ui/discussions)
-
 ---
 
 **Made with ❤️ by [rashpile](https://github.com/rashpile)**

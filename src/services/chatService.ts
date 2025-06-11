@@ -11,7 +11,7 @@ class ChatService {
   // Process a chat request and return response
   async processChat(request: ChatRequest): Promise<ChatResponse> {
     try {
-      const { message, currentDiagram, context } = request;
+      const { message, currentDiagram } = request;
       
       // Use enhanced intent analysis
       const intent = analyzeIntent(message, currentDiagram || '');
@@ -90,7 +90,7 @@ class ChatService {
   // Process diagram update requests specifically
   async updateDiagram(request: DiagramUpdateRequest): Promise<DiagramUpdateResponse> {
     try {
-      const { currentDiagram, userPrompt, conversationHistory } = request;
+      const { currentDiagram, userPrompt } = request;
       
       // Build context-aware prompt for diagram updates
       const systemPrompt = buildContextualPrompt(

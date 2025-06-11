@@ -1,8 +1,5 @@
 import { OpenAI } from 'openai';
 import { 
-  OpenAICompletionRequest, 
-  OpenAICompletionResponse, 
-  OpenAIError,
   ApiConfig,
   HttpError 
 } from '../types/api';

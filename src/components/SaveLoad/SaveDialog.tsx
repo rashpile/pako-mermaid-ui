@@ -9,7 +9,7 @@ interface SaveDialogProps {
 }
 
 export function SaveDialog({ isOpen, onClose, currentDiagram }: SaveDialogProps) {
-  const { saveDiagram, savedDiagrams } = useDiagram();
+  const { saveDiagram, savedDiagrams, updateName } = useDiagram();
   const [name, setName] = useState(currentDiagram?.name || '');
   const [description, setDescription] = useState(currentDiagram?.description || '');
   const [isSaving, setIsSaving] = useState(false);
@@ -29,7 +29,12 @@ export function SaveDialog({ isOpen, onClose, currentDiagram }: SaveDialogProps)
     setError(null);
 
     try {
-      const success = await saveDiagram(name.trim(), description.trim());
+      // Update the diagram name and description first
+      updateName(name.trim());
+      // TODO: Add updateDescription method to store if needed
+      
+      // Then save
+      const success = await saveDiagram();
       if (success) {
         onClose();
         setName('');

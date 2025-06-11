@@ -82,7 +82,7 @@ export function useLocalStorageBoolean(
   key: StorageKey,
   defaultValue = false
 ): [boolean, () => void, () => void, (value: boolean) => void] {
-  const [value, setValue, removeValue, isReady] = useLocalStorage(key, defaultValue);
+  const [value, setValue, , isReady] = useLocalStorage(key, defaultValue);
 
   const toggle = useCallback(() => {
     setValue(!value);
@@ -90,10 +90,6 @@ export function useLocalStorageBoolean(
 
   const setTrue = useCallback(() => {
     setValue(true);
-  }, [setValue]);
-
-  const setFalse = useCallback(() => {
-    setValue(false);
   }, [setValue]);
 
   return [value, toggle, isReady ? setTrue : () => {}, setValue];
@@ -114,7 +110,7 @@ export function useLocalStorageArray<T>(
   setItems: (items: T[]) => void;
   isReady: boolean;
 } {
-  const [items, setItems, removeValue, isReady] = useLocalStorage(key, defaultValue);
+  const [items, setItems, , isReady] = useLocalStorage(key, defaultValue);
 
   const addItem = useCallback((item: T) => {
     setItems([...items, item]);
@@ -161,7 +157,7 @@ export function useLocalStorageObject<T extends Record<string, unknown>>(
   setObject: (object: T) => void;
   isReady: boolean;
 } {
-  const [object, setObject, removeValue, isReady] = useLocalStorage(key, defaultValue);
+  const [object, setObject, , isReady] = useLocalStorage(key, defaultValue);
 
   const updateProperty = useCallback(<K extends keyof T>(property: K, value: T[K]) => {
     setObject({ ...object, [property]: value });

@@ -118,7 +118,6 @@ export function App() {
                     isVisible={isChatVisible}
                     onToggle={handleChatToggle}
                     onDiagramUpdate={handleChatDiagramUpdate}
-                    currentDiagram={content}
                   />
                 </div>
               </div>

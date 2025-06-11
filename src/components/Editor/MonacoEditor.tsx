@@ -1,5 +1,6 @@
 import { useRef, useEffect, useCallback, memo } from 'react';
 import Editor, { Monaco } from '@monaco-editor/react';
+import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { useDiagram } from '../../hooks/useDiagram';
 import { useTheme } from '../../hooks/useTheme';
 import { useSettingsStore } from '../../store/settingsStore';
@@ -20,7 +21,7 @@ function MonacoEditorComponent({
   const { content, updateContent, isValid, error } = useDiagram();
   const { resolvedTheme } = useTheme();
   const { settings } = useSettingsStore();
-  const editorRef = useRef<any>(null);
+  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const monacoRef = useRef<Monaco | null>(null);
 
 
@@ -148,27 +149,27 @@ function MonacoEditorComponent({
       const monaco = monacoRef.current;
       const model = editor.getModel();
       
-      if (!model || editor._isDisposed) return;
+      if (!model) return;
 
       // Clear existing decorations
       const decorations = editor.getModel()?.getAllDecorations() || [];
-      const errorDecorations = decorations.filter((d: any) => d.options.className?.includes('error'));
+      const errorDecorations = decorations.filter((d: monaco.editor.IModelDecoration) => d.options.className?.includes('error'));
       
       if (errorDecorations.length > 0) {
-        editor.removeDecorations(errorDecorations.map((d: any) => d.id));
+        editor.removeDecorations(errorDecorations.map((d: monaco.editor.IModelDecoration) => d.id));
       }
 
       // Add error decoration if there's an error
       if (!isValid && error) {
         const lineCount = model.getLineCount();
-        editor.addDecoration({
+        editor.deltaDecorations([], [{
           range: new monaco.Range(1, 1, lineCount, 1),
           options: {
             className: 'monaco-error-decoration',
             hoverMessage: { value: error },
             glyphMarginClassName: 'monaco-error-glyph'
           }
-        });
+        }]);
       }
     } catch (error) {
       console.debug('Monaco decoration error (ignored):', error);
@@ -176,7 +177,7 @@ function MonacoEditorComponent({
   }, [isValid, error]);
 
   // Handle editor mount
-  const handleEditorDidMount = useCallback((editor: any, monaco: Monaco) => {
+  const handleEditorDidMount = useCallback((editor: monaco.editor.IStandaloneCodeEditor, monaco: Monaco) => {
     try {
       editorRef.current = editor;
       configureMonaco(monaco);
@@ -232,7 +233,7 @@ function MonacoEditorComponent({
           if (editorRef.current) {
             const editor = editorRef.current;
             // Check if editor is still valid before disposing
-            if (typeof editor.dispose === 'function' && !editor._isDisposed) {
+            if (typeof editor.dispose === 'function') {
               editor.dispose();
             }
             editorRef.current = null;

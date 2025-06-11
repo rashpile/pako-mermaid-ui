@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useSettingsStore } from '../store/settingsStore';
 import { openAIService } from '../services/openaiService';
 import { ApiKeyValidationResult } from '../types/chat';
-import { getApiKey, saveApiKey, removeApiKey } from '../utils/storage';
+import { getApiKey } from '../utils/storage';
 import { useDebouncedCallback } from './useDebounce';
 
 /**

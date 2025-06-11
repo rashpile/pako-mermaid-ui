@@ -58,7 +58,7 @@ export function useDebouncedCallback<T extends (...args: unknown[]) => unknown>(
 /**
  * Hook for debouncing async functions with cancellation support
  */
-export function useDebouncedAsync<T extends (...args: unknown[]) => Promise<unknown>>(
+export function useDebouncedAsync<T extends (...args: any[]) => Promise<any>>(
   asyncFn: T,
   delay: number,
   deps: React.DependencyList = []

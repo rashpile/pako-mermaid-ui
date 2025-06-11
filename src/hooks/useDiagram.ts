@@ -16,7 +16,6 @@ export function useDiagram() {
     setCurrentDiagram,
     updateDiagramContent,
     setEditorState,
-    setValidationResult,
     createNewDiagram,
     saveDiagramToStorage,
     loadDiagram,
@@ -24,8 +23,7 @@ export function useDiagram() {
     duplicateDiagram,
     resetEditor,
     setLoading,
-    setSaving,
-    loadSavedDiagrams
+    setSaving
   } = useDiagramStore();
 
   // Simple update function without validation to stop infinite loops
@@ -138,6 +136,6 @@ export function useDiagram() {
     currentDiagram: currentDiagram,
     
     // Validation - disabled for now
-    validateDiagram: (content: string) => {}
+    validateDiagram: (_content: string) => {}
   };
 }

@@ -248,8 +248,6 @@ function MermaidPreviewComponent({
           onFitToScreen={handleFitToScreen}
           isRendering={isRendering}
           canExport={!!renderedSvg && currentValidation.isValid}
-          onUpdatePreview={updatePreview}
-          hasContentChanged={hasContentChanged}
         />
       )}
       

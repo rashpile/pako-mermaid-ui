@@ -10,8 +10,6 @@ interface PreviewControlsProps {
   onFitToScreen: () => void;
   isRendering: boolean;
   canExport: boolean;
-  onUpdatePreview?: () => void;
-  hasContentChanged?: boolean;
 }
 
 export function PreviewControls({
@@ -21,9 +19,7 @@ export function PreviewControls({
   onZoomReset,
   onFitToScreen,
   isRendering,
-  canExport,
-  onUpdatePreview,
-  hasContentChanged
+  canExport
 }: PreviewControlsProps) {
   const handleExport = async (format: ExportFormat) => {
     if (!canExport) return;

@@ -108,7 +108,7 @@ export function removeApiKey(): boolean {
 }
 
 // Layout storage
-export function saveLayout(layout: Record<string, unknown>): boolean {
+export function saveLayout(layout: Record<string, unknown> | object): boolean {
   return setToStorage(STORAGE_KEYS.LAYOUT, layout);
 }
 
