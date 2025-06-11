@@ -28,7 +28,12 @@ export function App() {
 
   // Toggle chat visibility
   const handleChatToggle = () => {
-    setChatVisible(!isChatVisible);
+    const newVisibility = !isChatVisible;
+    setChatVisible(newVisibility);
+    
+    // Also update the layout settings to show/hide the right panel
+    const { updateLayoutSettings } = useSettingsStore.getState();
+    updateLayoutSettings({ showRightPanel: newVisibility });
   };
 
   return (
@@ -87,7 +92,7 @@ export function App() {
             </div>
           }
           rightPanel={
-            layoutSettings.showRightPanel ? (
+            (layoutSettings.showRightPanel || isChatVisible) ? (
               <div className="h-full flex flex-col">
                 {/* Chat Header */}
                 <div className="flex-none bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-2">
