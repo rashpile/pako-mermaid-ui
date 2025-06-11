@@ -3,28 +3,29 @@ import { useDiagram } from '../../hooks/useDiagram';
 import { EXAMPLE_DIAGRAMS } from '../../constants/examples';
 
 export function ExampleSelector() {
-  const { loadDiagram, currentDiagram } = useDiagram();
+  const { updateContent, currentDiagram } = useDiagram();
   const [isOpen, setIsOpen] = useState(false);
 
   // Handle example selection
-  const handleSelectExample = (exampleKey: string) => {
-    const example = EXAMPLE_DIAGRAMS[exampleKey];
-    if (!example) return;
+  const handleSelectExample = (exampleIndex: number) => {
+    const example = EXAMPLE_DIAGRAMS[exampleIndex];
+    if (!example) {
+      console.error('[ExampleSelector] Example not found at index:', exampleIndex);
+      return;
+    }
+
+    console.log('[ExampleSelector] Loading example:', example.type);
 
     // Warn if current diagram has content
-    if (currentDiagram.content.trim() && 
+    if (currentDiagram?.content?.trim() && 
         !confirm('Load example diagram? Current changes will be lost.')) {
+      console.log('[ExampleSelector] Load cancelled by user');
       setIsOpen(false);
       return;
     }
 
-    loadDiagram({
-      name: example.name,
-      content: example.content,
-      description: example.description,
-      lastModified: new Date(),
-      created: new Date()
-    });
+    console.log('[ExampleSelector] Updating content with example:', example.example.substring(0, 100) + '...');
+    updateContent(example.example);
     
     setIsOpen(false);
   };
@@ -61,14 +62,14 @@ export function ExampleSelector() {
                 Choose an example to get started
               </div>
               
-              {Object.entries(EXAMPLE_DIAGRAMS).map(([key, example]) => (
+              {EXAMPLE_DIAGRAMS.map((example, index) => (
                 <button
-                  key={key}
-                  onClick={() => handleSelectExample(key)}
+                  key={index}
+                  onClick={() => handleSelectExample(index)}
                   className="block w-full text-left px-3 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 border-b border-gray-100 dark:border-gray-700 last:border-0"
                 >
                   <div className="font-medium text-sm text-gray-900 dark:text-gray-100">
-                    {example.name}
+                    {example.type.charAt(0).toUpperCase() + example.type.slice(1)} Diagram
                   </div>
                   <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
                     {example.description}
@@ -78,7 +79,7 @@ export function ExampleSelector() {
                       {example.type}
                     </span>
                     <span className="text-xs text-gray-400 dark:text-gray-500 ml-2">
-                      {example.difficulty}
+                      {example.syntax}
                     </span>
                   </div>
                 </button>
