@@ -1,5 +1,6 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useDiagram } from '../../hooks/useDiagram';
+import { useDiagramStore } from '../../store/diagramStore';
 import { DiagramData } from '../../types';
 import { DiagramList } from './DiagramList';
 
@@ -11,6 +12,7 @@ interface LoadDialogProps {
 
 export function LoadDialog({ isOpen, onClose, currentDiagram }: LoadDialogProps) {
   const { savedDiagrams, loadDiagram, deleteDiagram } = useDiagram();
+  const { loadSavedDiagrams } = useDiagramStore();
   const [selectedDiagram, setSelectedDiagram] = useState<DiagramData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -55,18 +57,23 @@ export function LoadDialog({ isOpen, onClose, currentDiagram }: LoadDialogProps)
 
   // Handle load diagram
   const handleLoad = useCallback(async (diagram: DiagramData) => {
+    console.log('[LoadDialog] Attempting to load diagram:', diagram.name, 'ID:', diagram.id);
+    
     // Check if current diagram has unsaved changes
     if (currentDiagram?.content.trim() && 
         !confirm('Load diagram? Current changes will be lost.')) {
+      console.log('[LoadDialog] Load cancelled by user');
       return;
     }
 
     setIsLoading(true);
     try {
-      await loadDiagram(diagram);
+      console.log('[LoadDialog] Calling loadDiagram with ID:', diagram.id);
+      const result = await loadDiagram(diagram.id);
+      console.log('[LoadDialog] Load result:', result);
       onClose();
     } catch (error) {
-      console.error('Failed to load diagram:', error);
+      console.error('[LoadDialog] Failed to load diagram:', error);
     } finally {
       setIsLoading(false);
     }
@@ -96,6 +103,15 @@ export function LoadDialog({ isOpen, onClose, currentDiagram }: LoadDialogProps)
       handleLoad(selectedDiagram);
     }
   }, [onClose, selectedDiagram, handleLoad]);
+
+  // Load saved diagrams when dialog opens
+  useEffect(() => {
+    if (isOpen) {
+      console.log('[LoadDialog] Loading saved diagrams...');
+      loadSavedDiagrams();
+      console.log('[LoadDialog] Current saved diagrams count:', savedDiagrams.length);
+    }
+  }, [isOpen, loadSavedDiagrams, savedDiagrams.length]);
 
   // Reset state when dialog opens/closes
   React.useEffect(() => {
