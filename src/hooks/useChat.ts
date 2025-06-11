@@ -5,7 +5,7 @@ import { useSettingsStore } from '../store/settingsStore';
 import { chatService } from '../services/chatService';
 import { ChatRequest } from '../types/chat';
 import { useDebouncedCallback } from './useDebounce';
-import { analyzeIntent, buildOpenAIPrompt, generateSuggestions } from '../utils/aiPromptProcessor';
+import { analyzeIntent, generateSuggestions } from '../utils/aiPromptProcessor';
 import { analyzeDiagram } from '../utils/diagramAnalyzer';
 
 /**

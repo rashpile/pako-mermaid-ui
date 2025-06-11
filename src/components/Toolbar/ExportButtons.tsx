@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useDiagram } from '../../hooks/useDiagram';
 import { validateElementForPNGExport } from '../../utils/exportToPNG';
 import { validateElementForSVGExport } from '../../utils/exportToSVG';
 import { validateElementForPDFExport } from '../../utils/exportToPDF';
+import { exportToPNG } from '../../utils/exportToPNG';
+import { exportToSVG } from '../../utils/exportToSVG';
+import { exportToPDF } from '../../utils/exportToPDF';
 
 export function ExportButtons() {
-  const { currentDiagram, exportDiagram } = useDiagram();
+  const { currentDiagram } = useDiagram();
   const [isExporting, setIsExporting] = useState(false);
   const [exportStatus, setExportStatus] = useState<string | null>(null);
 
@@ -26,7 +29,7 @@ export function ExportButtons() {
 
   // Validate export capability for format
   const canExport = (format: 'png' | 'svg' | 'pdf'): boolean => {
-    if (!currentDiagram.content.trim()) return false;
+    if (!currentDiagram?.content?.trim()) return false;
     
     const element = getExportElement();
     if (!element) return false;
@@ -64,11 +67,22 @@ export function ExportButtons() {
 
     try {
       // Generate filename with diagram name
-      const filename = currentDiagram.name 
+      const filename = currentDiagram?.name 
         ? currentDiagram.name.replace(/[^a-z0-9]/gi, '_') 
         : 'mermaid-diagram';
 
-      await exportDiagram(format, { filename });
+      // Export based on format
+      switch (format) {
+        case 'png':
+          await exportToPNG(element, { filename });
+          break;
+        case 'svg':
+          await exportToSVG(element, { filename });
+          break;
+        case 'pdf':
+          await exportToPDF(element, { filename });
+          break;
+      }
       setExportStatus(`Exported as ${format.toUpperCase()}`);
       setTimeout(() => setExportStatus(null), 3000);
     } catch (error) {

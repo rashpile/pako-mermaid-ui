@@ -1,4 +1,4 @@
-import React from 'react';
+// Preview controls component
 import { exportDiagram, generateFilename } from '../../utils/export';
 import { ExportFormat } from '../../types';
 
@@ -10,6 +10,8 @@ interface PreviewControlsProps {
   onFitToScreen: () => void;
   isRendering: boolean;
   canExport: boolean;
+  onUpdatePreview?: () => void;
+  hasContentChanged?: boolean;
 }
 
 export function PreviewControls({
@@ -19,7 +21,9 @@ export function PreviewControls({
   onZoomReset,
   onFitToScreen,
   isRendering,
-  canExport
+  canExport,
+  onUpdatePreview,
+  hasContentChanged
 }: PreviewControlsProps) {
   const handleExport = async (format: ExportFormat) => {
     if (!canExport) return;
