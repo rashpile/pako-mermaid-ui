@@ -36,7 +36,7 @@ export interface MermaidValidationResult {
 }
 
 // Export formats
-export type ExportFormat = 'png' | 'svg' | 'pdf';
+export type ExportFormat = 'svg';
 
 export interface ExportOptions {
   format: ExportFormat;

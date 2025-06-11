@@ -242,13 +242,9 @@ export const TUTORIAL_DIAGRAMS = {
     end
     
     subgraph "Export Options"
-        H[PNG] 
-        I[SVG]
-        J[PDF]
+        H[SVG]
     end
     
     B --> E
-    G --> H
-    G --> I
-    G --> J`
+    G --> H`
 };

@@ -85,7 +85,7 @@ export function analyzeIntent(prompt: string, currentDiagram: string): Processed
   
   // Export intent
   if (lowerPrompt.includes('export') || lowerPrompt.includes('download') || lowerPrompt.includes('save as') ||
-      lowerPrompt.includes('pdf') || lowerPrompt.includes('png') || lowerPrompt.includes('svg')) {
+      lowerPrompt.includes('svg')) {
     return {
       intent: 'export',
       confidence: 0.9

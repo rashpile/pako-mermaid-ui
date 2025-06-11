@@ -38,7 +38,7 @@ A modern, web-based Mermaid diagram editor with real-time preview and AI-powered
 
 ### 💾 **Data Management**
 - **Save/Load diagrams** to local storage
-- **Export functionality** (PNG, SVG, PDF)
+- **Export functionality** (SVG)
 - **Example templates** for quick start
 - **Diagram history** and version management
 
@@ -240,14 +240,8 @@ The project includes automated CI/CD workflows for building and deploying Docker
 ### Diagram Export
 
 ```javascript
-// Export as PNG
-await exportToPNG(element, { filename: 'diagram.png' });
-
 // Export as SVG
 await exportToSVG(element, { filename: 'diagram.svg' });
-
-// Export as PDF
-await exportToPDF(element, { filename: 'diagram.pdf' });
 ```
 
 ### AI Integration

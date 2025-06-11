@@ -21,17 +21,17 @@ export function PreviewControls({
   isRendering,
   canExport
 }: PreviewControlsProps) {
-  const handleExport = async (format: ExportFormat) => {
+  const handleExport = async () => {
     if (!canExport) return;
     
     const container = document.querySelector('.mermaid-container') as HTMLElement;
     if (!container) return;
     
     try {
-      const filename = generateFilename('mermaid-diagram', format);
-      await exportDiagram(container, format, { filename });
+      const filename = generateFilename('mermaid-diagram', 'svg');
+      await exportDiagram(container, 'svg', { filename });
     } catch (error) {
-      console.error(`Failed to export ${format.toUpperCase()}:`, error);
+      console.error('Failed to export SVG:', error);
       // Could show a toast notification here
     }
   };
@@ -86,33 +86,13 @@ export function PreviewControls({
       
       {/* Export Controls */}
       <div className="flex items-center space-x-2">
-        <span className="text-sm text-gray-600 dark:text-gray-400">Export:</span>
-        
         <button
-          onClick={() => handleExport('png')}
-          disabled={!canExport || isRendering}
-          className="btn-outline px-3 py-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-          title="Export as PNG"
-        >
-          PNG
-        </button>
-        
-        <button
-          onClick={() => handleExport('svg')}
+          onClick={handleExport}
           disabled={!canExport || isRendering}
           className="btn-outline px-3 py-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
           title="Export as SVG"
         >
-          SVG
-        </button>
-        
-        <button
-          onClick={() => handleExport('pdf')}
-          disabled={!canExport || isRendering}
-          className="btn-outline px-3 py-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-          title="Export as PDF"
-        >
-          PDF
+          Export SVG
         </button>
       </div>
     </div>
