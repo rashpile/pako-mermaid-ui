@@ -55,7 +55,7 @@ const createInitialEditorState = (): EditorState => ({
 });
 
 function generateId(): string {
-  return `diagram_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  return `diagram_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
 }
 
 export const useDiagramStore = create<DiagramStore>()((set, get) => ({
@@ -82,6 +82,7 @@ export const useDiagramStore = create<DiagramStore>()((set, get) => ({
     },
 
     updateDiagramContent: (content) => {
+      console.log('[DiagramStore] updateDiagramContent called with:', content?.substring(0, 100) + '...');
       const { currentDiagram } = get();
       if (currentDiagram) {
         const updatedDiagram = {
@@ -90,10 +91,14 @@ export const useDiagramStore = create<DiagramStore>()((set, get) => ({
           lastModified: new Date(),
           updatedAt: new Date()
         };
+        console.log('[DiagramStore] Updating store with new content');
         set({ 
           currentDiagram: updatedDiagram,
           editorState: { ...get().editorState, content }
         });
+        console.log('[DiagramStore] Store updated successfully');
+      } else {
+        console.log('[DiagramStore] No current diagram to update');
       }
     },
 

@@ -14,16 +14,15 @@ interface MonacoEditorProps {
 
 function MonacoEditorComponent({
   className = '',
-  height = '100%',
-  width = '100%',
   readOnly = false,
   onMount
 }: MonacoEditorProps) {
-  const { content, updateContent, updateCursorPosition, isValid, error } = useDiagram();
+  const { content, updateContent, isValid, error } = useDiagram();
   const { resolvedTheme } = useTheme();
   const { settings } = useSettingsStore();
   const editorRef = useRef<any>(null);
   const monacoRef = useRef<Monaco | null>(null);
+
 
   // Configure Monaco for Mermaid syntax highlighting
   const configureMonaco = useCallback((monaco: Monaco) => {

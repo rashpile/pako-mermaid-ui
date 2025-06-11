@@ -1,4 +1,4 @@
-import { DiagramUpdate, ChatResponse } from '../types/chat';
+import { DiagramUpdate } from '../types/chat';
 import { SYSTEM_PROMPTS } from '../prompts/systemPrompts';
 
 export interface ProcessedPrompt {
@@ -138,23 +138,24 @@ export function buildOpenAIPrompt(
   currentDiagram: string,
   intent: ProcessedPrompt
 ): string {
-  let systemPrompt = SYSTEM_PROMPTS.base;
+  let systemPrompt = SYSTEM_PROMPTS.DIAGRAM_ASSISTANT;
   
+  // Add specific instructions based on intent
   switch (intent.intent) {
     case 'create':
-      systemPrompt += `\n\n${SYSTEM_PROMPTS.create}`;
+      systemPrompt += `\n\nYou are creating a new diagram from scratch. Focus on proper structure and clear organization.`;
       break;
     case 'modify':
-      systemPrompt += `\n\n${SYSTEM_PROMPTS.modify}`;
+      systemPrompt += `\n\nYou are modifying an existing diagram. Preserve the existing structure and add requested changes seamlessly.`;
       break;
     case 'explain':
-      systemPrompt += `\n\n${SYSTEM_PROMPTS.explain}`;
+      systemPrompt += `\n\n${SYSTEM_PROMPTS.DIAGRAM_ANALYZER}`;
       break;
     case 'help':
-      systemPrompt += `\n\n${SYSTEM_PROMPTS.help}`;
+      systemPrompt += `\n\nProvide helpful guidance and examples for diagram creation.`;
       break;
     default:
-      systemPrompt += `\n\n${SYSTEM_PROMPTS.general}`;
+      systemPrompt += `\n\nAnalyze the request and provide the most appropriate response.`;
   }
   
   let fullPrompt = systemPrompt;

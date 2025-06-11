@@ -30,6 +30,7 @@ export function useDiagram() {
 
   // Simple update function without validation to stop infinite loops
   const updateContent = useCallback((content: string) => {
+    console.log('[useDiagram] updateContent called with:', content?.substring(0, 100) + '...');
     updateDiagramContent(content);
   }, [updateDiagramContent]);
 

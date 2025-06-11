@@ -1,7 +1,7 @@
 import { openAIService } from './openaiService';
 import { ChatRequest, ChatResponse, DiagramUpdateRequest, DiagramUpdateResponse } from '../types/chat';
 import { SYSTEM_PROMPTS, buildContextualPrompt } from '../prompts/systemPrompts';
-import { categorizeUserIntent, extractDiagramType } from '../prompts/examples';
+// import { categorizeUserIntent, extractDiagramType } from '../prompts/examples';
 import { debounceAsync } from '../utils/debounce';
 import { analyzeIntent, buildOpenAIPrompt, parseAIResponse, generateSuggestions } from '../utils/aiPromptProcessor';
 import { validateMermaidSyntax } from '../utils/mermaidValidator';
@@ -54,10 +54,18 @@ class ChatService {
       const finalDiagram = aiResponse.diagram || result.diagram;
       
       // Determine if this is a valid diagram update
-      const isValidUpdate = finalDiagram && 
-                           currentDiagram && 
-                           finalDiagram.trim() !== currentDiagram.trim() &&
-                           (!validationResult || validationResult.isValid);
+      const hasDiagram = !!finalDiagram;
+      const isValidSyntax = !validationResult || validationResult.isValid;
+      const isValidUpdate = hasDiagram && isValidSyntax;
+
+      console.log('[ChatService] Diagram update check:', {
+        hasFinalDiagram: !!finalDiagram,
+        hasCurrentDiagram: !!currentDiagram,
+        isContentDifferent: finalDiagram && currentDiagram && finalDiagram.trim() !== currentDiagram.trim(),
+        isValidationPassed: isValidSyntax,
+        isValidUpdate,
+        finalDiagramPreview: finalDiagram?.substring(0, 100) + '...'
+      });
 
       return {
         message: result.explanation,
@@ -67,7 +75,7 @@ class ChatService {
           intent: intent.intent,
           confidence: intent.confidence,
           diagramAnalysis,
-          validationResult
+          validationResult: validationResult || undefined
         }
       };
     } catch (error) {

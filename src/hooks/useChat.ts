@@ -5,8 +5,7 @@ import { useSettingsStore } from '../store/settingsStore';
 import { chatService } from '../services/chatService';
 import { ChatRequest } from '../types/chat';
 import { useDebouncedCallback } from './useDebounce';
-import { analyzeIntent, buildOpenAIPrompt, parseAIResponse, generateSuggestions } from '../utils/aiPromptProcessor';
-import { validateMermaidSyntax } from '../utils/mermaidValidator';
+import { analyzeIntent, buildOpenAIPrompt, generateSuggestions } from '../utils/aiPromptProcessor';
 import { analyzeDiagram } from '../utils/diagramAnalyzer';
 
 /**
@@ -49,7 +48,7 @@ export function useChat() {
     addMessage('user', message.trim());
     setCurrentInput('');
     setLoading(true);
-    setError(null);
+    setError(undefined);
 
     try {
       const currentContent = currentDiagram?.content || '';
@@ -60,8 +59,8 @@ export function useChat() {
       // Analyze current diagram
       const diagramAnalysis = analyzeDiagram(currentContent);
       
-      // Build comprehensive prompt
-      const prompt = buildOpenAIPrompt(message, currentContent, intent);
+      // Build comprehensive prompt (used by chatService internally)
+      // const prompt = buildOpenAIPrompt(message, currentContent, intent);
       
       // Prepare enhanced chat request
       const request: ChatRequest = {
@@ -88,32 +87,27 @@ export function useChat() {
           processingTime
         });
       } else {
-        // Parse AI response for diagram updates
-        const aiUpdate = parseAIResponse(response.message);
-        
-        // Validate generated diagram if present
-        let validationResult = null;
-        if (aiUpdate.diagram) {
-          validationResult = validateMermaidSyntax(aiUpdate.diagram);
-        }
-        
-        // Add AI response with metadata
-        addMessage('assistant', response.message, {
-          diagramUpdate: !!aiUpdate.diagram && validationResult?.isValid,
-          processingTime,
-          intent: intent.intent,
-          confidence: aiUpdate.confidence,
-          validationResult
+        console.log('[useChat] Processing AI response:', {
+          hasUpdatedDiagram: !!response.updatedDiagram,
+          message: response.message?.substring(0, 100) + '...'
         });
 
-        // Update diagram if provided and valid
-        if (aiUpdate.diagram && validationResult?.isValid && currentDiagram) {
-          updateDiagramContent(aiUpdate.diagram);
-        } else if (aiUpdate.diagram && !validationResult?.isValid) {
-          // Show validation errors
-          addMessage('assistant', `The generated diagram has validation issues:\n${validationResult?.errors.map(e => `• ${e.message}`).join('\n')}`, {
-            error: true,
-            validationResult
+        // Add AI response with metadata
+        addMessage('assistant', response.message, {
+          diagramUpdate: !!response.updatedDiagram,
+          processingTime,
+          intent: intent.intent,
+          confidence: response.metadata?.confidence || 0.7
+        });
+
+        // Update diagram if provided by chat service
+        if (response.updatedDiagram && currentDiagram) {
+          console.log('[useChat] Updating diagram content with:', response.updatedDiagram.substring(0, 100) + '...');
+          updateDiagramContent(response.updatedDiagram);
+        } else {
+          console.log('[useChat] No diagram update available:', {
+            hasUpdatedDiagram: !!response.updatedDiagram,
+            hasCurrentDiagram: !!currentDiagram
           });
         }
       }
@@ -141,7 +135,8 @@ export function useChat() {
 
   // Debounced send message for rapid typing (non-async version)
   const sendMessageDebounced = useDebouncedCallback(
-    (message: string) => {
+    (...args: unknown[]) => {
+      const message = args[0] as string;
       sendMessage(message); // Fire and forget for debounced version
     }, 
     300, 
@@ -166,7 +161,7 @@ export function useChat() {
   // Start new conversation
   const startNewConversation = useCallback(() => {
     clearMessages();
-    setError(null);
+    setError(undefined);
   }, [clearMessages, setError]);
 
   // Retry last failed message
