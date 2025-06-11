@@ -1,6 +1,6 @@
 # GitHub Actions Workflows
 
-This directory contains GitHub Actions workflows for automated CI/CD of the Pako Mermaid UI project.
+This document describes the GitHub Actions workflows for automated CI/CD of the Pako Mermaid UI project.
 
 ## Workflows
 

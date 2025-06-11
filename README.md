@@ -219,6 +219,15 @@ npm run preview
 docker-compose --profile dev up
 ```
 
+### GitHub Actions
+
+The project includes automated CI/CD workflows for building and deploying Docker images. See [Workflows Documentation](.github/WORKFLOWS.md) for details on:
+
+- Automated Docker builds
+- Multi-platform images
+- Security scanning
+- Development workflows
+
 ### Code Quality
 
 - **ESLint** for code linting
