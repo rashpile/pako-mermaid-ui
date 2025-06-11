@@ -17,23 +17,7 @@ This directory contains GitHub Actions workflows for automated CI/CD of the Pako
 - Build cache optimization
 - Attestation and provenance generation
 
-### 2. `docker-hub.yml` - Docker Hub Publishing
-**Triggers:**
-- Push to `master`/`main` branches  
-- Tags starting with `v*`
-- GitHub releases
-
-**Features:**
-- Publishes to Docker Hub
-- Updates repository description from DOCKER.md
-- Multi-platform builds
-- Semantic versioning tags
-
-**Required Secrets:**
-- `DOCKERHUB_USERNAME` - Your Docker Hub username
-- `DOCKERHUB_TOKEN` - Docker Hub access token
-
-### 3. `ci-cd.yml` - Complete CI/CD Pipeline
+### 2. `ci-cd.yml` - Complete CI/CD Pipeline
 **Triggers:**
 - Push to `master`/`main`/`develop` branches
 - Pull requests to `master`/`main`
@@ -46,7 +30,7 @@ This directory contains GitHub Actions workflows for automated CI/CD of the Pako
 - SBOM generation for releases
 - Staging/production deployment workflows
 
-### 4. `docker-dev.yml` - Development Builds
+### 3. `docker-dev.yml` - Development Builds
 **Triggers:**
 - Push to `develop` branch
 - Push to `feature/*` branches
@@ -66,15 +50,6 @@ This directory contains GitHub Actions workflows for automated CI/CD of the Pako
 2. **No additional secrets needed** - uses `GITHUB_TOKEN` automatically
 3. **Images will be available at:** `ghcr.io/username/pako-mermaid-ui`
 
-### For Docker Hub
-
-1. **Create Docker Hub account** and repository
-2. **Generate access token** in Docker Hub settings
-3. **Add repository secrets:**
-   ```
-   DOCKERHUB_USERNAME=yourusername
-   DOCKERHUB_TOKEN=your_access_token
-   ```
 
 ### Setting up Environments (Optional)
 
@@ -150,9 +125,9 @@ docker pull ghcr.io/username/pako-mermaid-ui:dev-feature-auth
 3. **Review changes** in pull request
 4. **Merge to main** to activate
 
-### Adding New Registries
+### Adding Additional Registries
 
-Add additional registry steps in workflows:
+To publish to other registries, add additional login and push steps:
 ```yaml
 - name: Login to additional registry
   uses: docker/login-action@v3
@@ -168,7 +143,7 @@ Add additional registry steps in workflows:
 
 1. **Permission denied** - Check repository permissions for GitHub Packages
 2. **Build failures** - Review build logs and fix TypeScript/lint errors
-3. **Registry authentication** - Verify secrets and token permissions
+3. **Registry authentication** - Verify GitHub token permissions
 4. **Multi-platform builds** - May require additional setup for ARM64
 
 ### Debug Information

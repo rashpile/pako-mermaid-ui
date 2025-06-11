@@ -6,12 +6,15 @@ This document describes how to run the Mermaid UI application using Docker.
 
 ### Production Build
 ```bash
-# Build and run with Docker Compose
-docker-compose up -d
+# Run from GitHub Container Registry
+docker run -d -p 3000:80 --name mermaid-ui ghcr.io/pkoptilin/pako-mermaid-ui:latest
 
-# Or build and run manually
+# Or build and run locally
 docker build -t pako-mermaid-ui .
 docker run -d -p 3000:80 --name mermaid-ui pako-mermaid-ui
+
+# Or use Docker Compose
+docker-compose up -d
 ```
 
 ### Development Build
