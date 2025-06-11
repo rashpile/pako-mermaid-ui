@@ -1,9 +1,9 @@
 # 🧜‍♀️ Pako Mermaid UI
 
-[![Build and Push Docker Image](https://github.com/pkoptilin/pako-mermaid-ui/actions/workflows/docker-build.yml/badge.svg)](https://github.com/pkoptilin/pako-mermaid-ui/actions/workflows/docker-build.yml)
-[![CI/CD Pipeline](https://github.com/pkoptilin/pako-mermaid-ui/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/pkoptilin/pako-mermaid-ui/actions/workflows/ci-cd.yml)
-[![GitHub Container Registry](https://img.shields.io/badge/ghcr.io-latest-blue)](https://ghcr.io/pkoptilin/pako-mermaid-ui)
-[![GitHub release](https://img.shields.io/github/release/pkoptilin/pako-mermaid-ui.svg)](https://github.com/pkoptilin/pako-mermaid-ui/releases)
+[![Build and Push Docker Image](https://github.com/rashpile/pako-mermaid-ui/actions/workflows/docker-build.yml/badge.svg)](https://github.com/rashpile/pako-mermaid-ui/actions/workflows/docker-build.yml)
+[![CI/CD Pipeline](https://github.com/rashpile/pako-mermaid-ui/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/rashpile/pako-mermaid-ui/actions/workflows/ci-cd.yml)
+[![GitHub Container Registry](https://img.shields.io/badge/ghcr.io-latest-blue)](https://ghcr.io/rashpile/pako-mermaid-ui)
+[![GitHub release](https://img.shields.io/github/release/rashpile/pako-mermaid-ui.svg)](https://github.com/rashpile/pako-mermaid-ui/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A modern, web-based Mermaid diagram editor with real-time preview and AI-powered assistance. Create beautiful diagrams using simple text syntax with the help of an intelligent AI assistant.
@@ -54,10 +54,10 @@ A modern, web-based Mermaid diagram editor with real-time preview and AI-powered
 
 ```bash
 # Run with Docker
-docker run -d -p 3000:80 --name mermaid-ui ghcr.io/pkoptilin/pako-mermaid-ui:latest
+docker run -d -p 3000:80 --name mermaid-ui ghcr.io/rashpile/pako-mermaid-ui:latest
 
 # Or with Docker Compose
-curl -o docker-compose.yml https://raw.githubusercontent.com/pkoptilin/pako-mermaid-ui/main/docker-compose.yml
+curl -o docker-compose.yml https://raw.githubusercontent.com/rashpile/pako-mermaid-ui/main/docker-compose.yml
 docker-compose up -d
 ```
 
@@ -65,7 +65,7 @@ docker-compose up -d
 
 ```bash
 # Clone the repository
-git clone https://github.com/pkoptilin/pako-mermaid-ui.git
+git clone https://github.com/rashpile/pako-mermaid-ui.git
 cd pako-mermaid-ui
 
 # Install dependencies
@@ -138,7 +138,7 @@ NODE_ENV=production
 version: '3.8'
 services:
   mermaid-ui:
-    image: ghcr.io/pkoptilin/pako-mermaid-ui:latest
+    image: ghcr.io/rashpile/pako-mermaid-ui:latest
     ports:
       - "80:80"
     restart: unless-stopped
@@ -148,7 +148,7 @@ services:
 
 ### Available Images
 
-- **GitHub Container Registry:** `ghcr.io/pkoptilin/pako-mermaid-ui`
+- **GitHub Container Registry:** `ghcr.io/rashpile/pako-mermaid-ui`
 
 ### Image Tags
 
@@ -275,7 +275,7 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 ### Reporting Issues
 
-- Use [GitHub Issues](https://github.com/pkoptilin/pako-mermaid-ui/issues)
+- Use [GitHub Issues](https://github.com/rashpile/pako-mermaid-ui/issues)
 - Include reproduction steps
 - Provide browser/OS information
 
@@ -293,16 +293,16 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🌟 Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=pkoptilin/pako-mermaid-ui&type=Date)](https://star-history.com/#pkoptilin/pako-mermaid-ui&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=rashpile/pako-mermaid-ui&type=Date)](https://star-history.com/#rashpile/pako-mermaid-ui&Date)
 
 ## 📞 Support
 
-- **Documentation:** [Wiki](https://github.com/pkoptilin/pako-mermaid-ui/wiki)
-- **Issues:** [GitHub Issues](https://github.com/pkoptilin/pako-mermaid-ui/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/pkoptilin/pako-mermaid-ui/discussions)
+- **Documentation:** [Wiki](https://github.com/rashpile/pako-mermaid-ui/wiki)
+- **Issues:** [GitHub Issues](https://github.com/rashpile/pako-mermaid-ui/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/rashpile/pako-mermaid-ui/discussions)
 
 ---
 
-**Made with ❤️ by [pkoptilin](https://github.com/pkoptilin)**
+**Made with ❤️ by [rashpile](https://github.com/rashpile)**
 
 *If you find this project helpful, please consider giving it a ⭐!*
